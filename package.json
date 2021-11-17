@@ -1,0 +1,20 @@
+{
+  "name": "no-dux",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^16.11.7",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.177",
+    "tslint": "^6.1.3",
+    "typescript": "^4.4.4"
+  }
+}
