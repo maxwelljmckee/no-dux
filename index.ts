@@ -26,34 +26,39 @@ class StoreController {
     }
   };
 
+  private _parsePath = (path: string | string[]) => {
+    if (Array.isArray(path)) return path;
+    return path.split('.')
+  }
+
   createActions = (): void => {}
 
   // fetch whole store
   getStore = (): object => JSON.parse(localStorage.getItem(this.root) || '');
 
-  getStoreAsync = (): object => Promise.resolve().then(this.getStore)
+  getStoreAsync = async (): Promise<object> => Promise.resolve().then(this.getStore)
 
   // fetch a particular item from store
-  getItem = (path: string): any => _.get(JSON.parse(localStorage.getItem(this.root) || ''), path);
+  getItem = (path: string | string[]): any => _.get(JSON.parse(localStorage.getItem(this.root) || ''), this._parsePath(path));
 
-  getItemAsync = (path: string): any => Promise.resolve().then(() => this.getItem(path))
+  getItemAsync = async (path: string | string[]): Promise<any> => Promise.resolve().then(() => this.getItem(path))
 
   // spread an object into a particular path
-  setItem = (path: string, item: any): void => {
+  setItem = (path: string | string[], item: any): void => {
     const store = this.getStore();
-    const pathArray = path.split(".");
+    const pathArray = this._parsePath(path)
 
     const nextStore = this._updateNestedItem(store, pathArray, item);
 
     localStorage.setItem(this.root, JSON.stringify(nextStore));
   };
 
-  setItemAsync = (path: string, item: any) => {
+  setItemAsync = async (path: string | string[], item: any) => {
     return Promise.resolve().then(() => this.setItem(path, item))
   }
 
   // recursively overwrite the value of a nested store item
-  private _updateNestedItem = (parent: object, pathArray: string[], item: string | object): object => {
+  private _updateNestedItem = (parent: object, pathArray: string[], item: any): object => {
     const key = pathArray[0];
     const currentLayer = _.get(parent, `${key}`, {});
 
@@ -73,16 +78,16 @@ class StoreController {
   };
 
   // remove an entire domain, or a particular property from a domain
-  removeItem = (path: string, blacklist?: string | string[]): void => {
+  removeItem = (path: string | string[], blacklist?: string | string[]): void => {
     const store = this.getStore();
-    const pathArray = path.split(".");
+    const pathArray = this._parsePath(path)
 
     const nextStore = this._removeNestedItem(store, pathArray, blacklist);
 
     localStorage.setItem(this.root, JSON.stringify(nextStore));
   };
 
-  removeItemAsync = (path: string, blacklist?: string | string[]) => {
+  removeItemAsync = async (path: string | string[], blacklist?: string | string[]) => {
     return Promise.resolve().then(() => this.removeItem(path, blacklist));
   }
 
@@ -113,17 +118,20 @@ class StoreController {
   // clear all data from store leaving an empty object at root path
   clear = (): void => localStorage.setItem(this.root, JSON.stringify({}));
 
-  clearAsync = () => Promise.resolve().then(this.clear)
+  clearAsync = async () => Promise.resolve().then(this.clear)
 
-  checkSize = () => {
+  getSize = () => {
       const store = localStorage.getItem(this.root);
-      const spaceUsed: number = Number(((store.length * 16) / (8 * 1024)).toFixed(2))
+      const spaceUsed: number =((store.length * 16) / (8 * 1024))
       alert(`
+        Store length:
+          ${store.length > 2 ? store.length : 0} characters
+
         Approximate space used:
-        ${store.length > 2 ?  spaceUsed + " KB": "Empty (0 KB)"}
-        \n
+          ${store.length > 2 ?  spaceUsed.toFixed(2) + " KB": "Empty (0 KB)"}
+
         Approximate space remaining:
-        ${store.length > 2 ? 5120 - spaceUsed + " KB": "5 MB"}
+          ${store.length > 2 ? (5120 - spaceUsed).toFixed(2) + " KB": "5 MB"}
       `);
   }
 }
@@ -131,7 +139,4 @@ class StoreController {
 const store = new StoreController();
 
 export default store
-
-export const createStore = store.createStore
 export const actions = store.actions
-export const createActions = store.createActions
