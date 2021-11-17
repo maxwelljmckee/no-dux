@@ -1,21 +1,43 @@
 {
-  "name": "no-dux",
+  "name": "@no-dux/core",
   "version": "1.0.0",
-  "description": "A ridiculously lightweight and easy to use alternative to redux",
+  "description": "A ridiculously lightweight and easy-to-use alternative to redux",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "maxwelljmckee <maxwelljmckee@gmail.com>",
-  "keywords": ["global", "state", "management", "global-state", "state-management", "global-state-management", "redux", "persist", "persistence", "data-persist", "data-persistence", "frontend", "data"],
+  "keywords": [
+    "global",
+    "state",
+    "management",
+    "global-state",
+    "state-management",
+    "global-state-management",
+    "redux",
+    "persist",
+    "persistence",
+    "data-persist",
+    "data-persistence",
+    "frontend",
+    "data"
+  ],
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^16.11.7",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.177",
+    "@types/node": "^16.11.7",
     "tslint": "^6.1.3",
     "typescript": "^4.4.4"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maxwelljmckee/no-dux.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maxwelljmckee/no-dux/issues"
+  },
+  "homepage": "https://github.com/maxwelljmckee/no-dux#readme"
 }
