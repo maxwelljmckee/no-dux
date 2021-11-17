@@ -90,6 +90,11 @@ var StoreController = /** @class */ (function () {
         };
         this.clear = function () { return localStorage.setItem(_this.root, JSON.stringify({})); };
         this.clearAsync = function () { return Promise.resolve().then(_this.clear); };
+        this.checkSize = function () {
+            var store = localStorage.getItem(_this.root);
+            var spaceUsed = Number(((store.length * 16) / (8 * 1024)).toFixed(2));
+            alert("\n        Approximate space used:\n        " + (store.length > 2 ? spaceUsed + " KB" : "Empty (0 KB)") + "\n        \n\n        Approximate space remaining:\n        " + (store.length > 2 ? 5120 - spaceUsed + " KB" : "5 MB") + "\n      ");
+        };
         this.root = "root";
         this.config = {};
         this.actions = {};

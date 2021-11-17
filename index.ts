@@ -113,6 +113,18 @@ class StoreController {
   clear = (): void => localStorage.setItem(this.root, JSON.stringify({}));
 
   clearAsync = () => Promise.resolve().then(this.clear)
+
+  checkSize = () => {
+      const store = localStorage.getItem(this.root);
+      const spaceUsed: number = Number(((store.length * 16) / (8 * 1024)).toFixed(2))
+      alert(`
+        Approximate space used:
+        ${store.length > 2 ?  spaceUsed + " KB": "Empty (0 KB)"}
+        \n
+        Approximate space remaining:
+        ${store.length > 2 ? 5120 - spaceUsed + " KB": "5 MB"}
+      `);
+  }
 }
 
 const store = new StoreController();
