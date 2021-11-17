@@ -1,15 +1,21 @@
 const _ = require('lodash');
 
+
 interface CreateStoreParams {
   root?: string,
   defaults?: object,
   config?: object
 }
 
+interface ShapelessObject {
+  [key: string]: any;
+}
+
+
 class StoreController {
   root: string;
-  config: object;
-  actions: object
+  config: ShapelessObject;
+  actions: ShapelessObject;
 
   constructor() {
     this.root = "root";
@@ -31,7 +37,9 @@ class StoreController {
     return path.split('.')
   }
 
-  createActions = (): void => {}
+  createActions = (newActions: object): void => {
+    this.actions = {...this.actions, ...newActions}
+  }
 
   // fetch whole store
   getStore = (): object => JSON.parse(localStorage.getItem(this.root) || '');
@@ -136,7 +144,5 @@ class StoreController {
   }
 }
 
-const store = new StoreController();
 
-export default store
-export const actions = store.actions
+export default new StoreController();

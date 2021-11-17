@@ -47,7 +47,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.actions = void 0;
 var _ = require('lodash');
 var StoreController = /** @class */ (function () {
     function StoreController() {
@@ -68,7 +67,9 @@ var StoreController = /** @class */ (function () {
                 return path;
             return path.split('.');
         };
-        this.createActions = function () { };
+        this.createActions = function (newActions) {
+            _this.actions = __assign(__assign({}, _this.actions), newActions);
+        };
         // fetch whole store
         this.getStore = function () { return JSON.parse(localStorage.getItem(_this.root) || ''); };
         this.getStoreAsync = function () { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
@@ -162,6 +163,4 @@ var StoreController = /** @class */ (function () {
     }
     return StoreController;
 }());
-var store = new StoreController();
-exports["default"] = store;
-exports.actions = store.actions;
+exports["default"] = new StoreController();
