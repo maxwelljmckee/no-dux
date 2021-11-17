@@ -11,6 +11,7 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 exports.__esModule = true;
+exports.createActions = exports.actions = exports.createStore = void 0;
 var _ = require('lodash');
 var StoreController = /** @class */ (function () {
     function StoreController() {
@@ -26,6 +27,7 @@ var StoreController = /** @class */ (function () {
                 localStorage.setItem(_this.root, JSON.stringify(defaults));
             }
         };
+        this.createActions = function () { };
         // fetch whole store
         this.getStore = function () { return JSON.parse(localStorage.getItem(_this.root) || ''); };
         this.getStoreAsync = function () { return Promise.resolve().then(_this.getStore); };
@@ -90,7 +92,12 @@ var StoreController = /** @class */ (function () {
         this.clearAsync = function () { return Promise.resolve().then(_this.clear); };
         this.root = "root";
         this.config = {};
+        this.actions = {};
     }
     return StoreController;
 }());
-exports["default"] = new StoreController();
+var store = new StoreController();
+exports["default"] = store;
+exports.createStore = store.createStore;
+exports.actions = store.actions;
+exports.createActions = store.createActions;

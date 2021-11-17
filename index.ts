@@ -9,10 +9,12 @@ interface CreateStoreParams {
 class StoreController {
   root: string;
   config: object;
+  actions: object
 
   constructor() {
     this.root = "root";
     this.config = {};
+    this.actions = {}
   }
 
   createStore = ({root = 'root', defaults = {}, config = {}}: CreateStoreParams = {}): void => {
@@ -23,6 +25,8 @@ class StoreController {
       localStorage.setItem(this.root, JSON.stringify(defaults));
     }
   };
+
+  createActions = (): void => {}
 
   // fetch whole store
   getStore = (): object => JSON.parse(localStorage.getItem(this.root) || '');
@@ -111,4 +115,10 @@ class StoreController {
   clearAsync = () => Promise.resolve().then(this.clear)
 }
 
-export default new StoreController();
+const store = new StoreController();
+
+export default store
+
+export const createStore = store.createStore
+export const actions = store.actions
+export const createActions = store.createActions
