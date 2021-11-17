@@ -88,6 +88,7 @@ var StoreController = /** @class */ (function () {
             var child = _this._removeNestedItem(currentLayer, pathArray.slice(1), blacklist);
             return __assign(__assign({}, parent), (_b = {}, _b[key] = __assign({}, child), _b));
         };
+        // clear all data from store leaving an empty object at root path
         this.clear = function () { return localStorage.setItem(_this.root, JSON.stringify({})); };
         this.clearAsync = function () { return Promise.resolve().then(_this.clear); };
         this.checkSize = function () {

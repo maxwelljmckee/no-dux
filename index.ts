@@ -110,6 +110,7 @@ class StoreController {
     return { ...parent, [key]: { ...child } };
   };
 
+  // clear all data from store leaving an empty object at root path
   clear = (): void => localStorage.setItem(this.root, JSON.stringify({}));
 
   clearAsync = () => Promise.resolve().then(this.clear)
