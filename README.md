@@ -1,2 +1,4 @@
 # no-dux
-A shockingly easy and lightweight alternative to Redux
+A ridiculously lightweight and easy-to-use alternative to Redux
+
+
