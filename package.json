@@ -1,12 +1,13 @@
 {
   "name": "no-dux",
   "version": "1.0.0",
-  "description": "",
+  "description": "A ridiculously lightweight and easy to use alternative to redux",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "maxwelljmckee <maxwelljmckee@gmail.com>",
+  "keywords": ["global", "state", "management", "global-state", "state-management", "global-state-management", "redux", "persist", "persistence", "data-persist", "data-persistence", "frontend", "data"],
   "license": "ISC",
   "dependencies": {
     "@types/node": "^16.11.7",
