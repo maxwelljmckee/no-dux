@@ -20,7 +20,7 @@ class StoreController {
   constructor() {
     this.root = "root";
     this.config = {};
-    this.actions = {}
+    this.actions = {};
   }
 
   createStore = ({root = 'root', defaults = {}, config = {}}: CreateStoreParams = {}): void => {
@@ -59,6 +59,7 @@ class StoreController {
     const nextStore = this._updateNestedItem(store, pathArray, item);
 
     localStorage.setItem(this.root, JSON.stringify(nextStore));
+    document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathArray }))
   };
 
   setItemAsync = async (path: string | string[], item: any) => {
@@ -93,6 +94,7 @@ class StoreController {
     const nextStore = this._removeNestedItem(store, pathArray, blacklist);
 
     localStorage.setItem(this.root, JSON.stringify(nextStore));
+    document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathArray }))
   };
 
   removeItemAsync = async (path: string | string[], blacklist?: string | string[]) => {
@@ -124,7 +126,10 @@ class StoreController {
   };
 
   // clear all data from store leaving an empty object at root path
-  clear = (): void => localStorage.setItem(this.root, JSON.stringify({}));
+  clear = (): void => {
+    localStorage.setItem(this.root, JSON.stringify({}))
+    document.dispatchEvent(new CustomEvent('watch:store-update', { detail: 'clear' }))
+  }
 
   clearAsync = async () => Promise.resolve().then(this.clear)
 
