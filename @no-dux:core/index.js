@@ -93,7 +93,7 @@ var StoreController = /** @class */ (function () {
             var pathArray = _this._parsePath(path);
             var nextStore = _this._updateNestedItem(store, pathArray, item);
             localStorage.setItem(_this.root, JSON.stringify(nextStore));
-            document.dispatchEvent(new CustomEvent('watch:store-item', { detail: { things: 'stuf' } }));
+            document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathArray }));
         };
         this.setItemAsync = function (path, item) { return __awaiter(_this, void 0, void 0, function () {
             var _this = this;
@@ -121,7 +121,7 @@ var StoreController = /** @class */ (function () {
             var pathArray = _this._parsePath(path);
             var nextStore = _this._removeNestedItem(store, pathArray, blacklist);
             localStorage.setItem(_this.root, JSON.stringify(nextStore));
-            document.dispatchEvent(new Event('watch:store-item'));
+            document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathArray }));
         };
         this.removeItemAsync = function (path, blacklist) { return __awaiter(_this, void 0, void 0, function () {
             var _this = this;
@@ -152,7 +152,7 @@ var StoreController = /** @class */ (function () {
         // clear all data from store leaving an empty object at root path
         this.clear = function () {
             localStorage.setItem(_this.root, JSON.stringify({}));
-            document.dispatchEvent(new Event('watch:store-item'));
+            document.dispatchEvent(new CustomEvent('watch:store-update', { detail: 'clear' }));
         };
         this.clearAsync = function () { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
             return [2 /*return*/, Promise.resolve().then(this.clear)];

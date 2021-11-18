@@ -8,6 +8,7 @@
   },
   "author": "maxwelljmckee <maxwelljmckee@gmail.com>",
   "keywords": [
+    "redux",
     "global",
     "state",
     "management",
@@ -20,7 +21,8 @@
     "data-persist",
     "data-persistence",
     "frontend",
-    "data"
+    "data",
+    "localStorage"
   ],
   "license": "ISC",
   "dependencies": {
