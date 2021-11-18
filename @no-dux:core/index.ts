@@ -150,4 +150,4 @@ class StoreController {
 }
 
 
-export default new StoreController();
+export const nodux = new StoreController();
