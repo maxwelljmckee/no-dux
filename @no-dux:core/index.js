@@ -47,6 +47,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.nodux = void 0;
 var _ = require('lodash');
 var StoreController = /** @class */ (function () {
     function StoreController() {
@@ -168,4 +169,4 @@ var StoreController = /** @class */ (function () {
     }
     return StoreController;
 }());
-exports["default"] = new StoreController();
+exports.nodux = new StoreController();
