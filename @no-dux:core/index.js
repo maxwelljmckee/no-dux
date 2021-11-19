@@ -47,7 +47,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.nodux = void 0;
+exports.nodux = exports.StoreController = void 0;
 var _ = require('lodash');
 var StoreController = /** @class */ (function () {
     function StoreController() {
@@ -62,11 +62,12 @@ var StoreController = /** @class */ (function () {
             if (!initial) {
                 localStorage.setItem(_this.root, JSON.stringify(defaults));
             }
+            ;
         };
         this._parsePath = function (path) {
-            if (Array.isArray(path))
-                return path;
-            return path.split('.');
+            var pathArray = (typeof path === 'string') ? path.split('.') : path;
+            var pathString = (typeof path === 'string') ? path : path.join('.');
+            return { pathArray: pathArray, pathString: pathString };
         };
         this.createActions = function (newActions) {
             _this.actions = __assign(__assign({}, _this.actions), newActions);
@@ -74,12 +75,10 @@ var StoreController = /** @class */ (function () {
         // fetch whole store
         this.getStore = function () { return JSON.parse(localStorage.getItem(_this.root) || ''); };
         this.getStoreAsync = function () { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
-            return [2 /*return*/, Promise.resolve().then(this.getStore)
-                // fetch a particular item from store
-            ];
+            return [2 /*return*/, Promise.resolve().then(this.getStore)];
         }); }); };
         // fetch a particular item from store
-        this.getItem = function (path) { return _.get(JSON.parse(localStorage.getItem(_this.root) || ''), _this._parsePath(path)); };
+        this.getItem = function (path) { return _.get(JSON.parse(localStorage.getItem(_this.root) || ''), path); };
         this.getItemAsync = function (path) { return __awaiter(_this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
@@ -91,10 +90,10 @@ var StoreController = /** @class */ (function () {
         // spread an object into a particular path
         this.setItem = function (path, item) {
             var store = _this.getStore();
-            var pathArray = _this._parsePath(path);
+            var _a = _this._parsePath(path), pathArray = _a.pathArray, pathString = _a.pathString;
             var nextStore = _this._updateNestedItem(store, pathArray, item);
             localStorage.setItem(_this.root, JSON.stringify(nextStore));
-            document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathArray }));
+            document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathString }));
         };
         this.setItemAsync = function (path, item) { return __awaiter(_this, void 0, void 0, function () {
             var _this = this;
@@ -111,18 +110,20 @@ var StoreController = /** @class */ (function () {
                 if (typeof item === "object" && !Array.isArray(item)) {
                     return __assign(__assign({}, parent), (_a = {}, _a[key] = __assign(__assign({}, currentLayer), item), _a));
                 }
+                ;
                 return __assign(__assign({}, parent), (_b = {}, _b[key] = item, _b));
             }
+            ;
             var child = _this._updateNestedItem(currentLayer, pathArray.slice(1), item);
             return __assign(__assign({}, parent), (_c = {}, _c[key] = __assign({}, child), _c));
         };
         // remove an entire domain, or a particular property from a domain
         this.removeItem = function (path, blacklist) {
             var store = _this.getStore();
-            var pathArray = _this._parsePath(path);
+            var _a = _this._parsePath(path), pathArray = _a.pathArray, pathString = _a.pathString;
             var nextStore = _this._removeNestedItem(store, pathArray, blacklist);
             localStorage.setItem(_this.root, JSON.stringify(nextStore));
-            document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathArray }));
+            document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathString }));
         };
         this.removeItemAsync = function (path, blacklist) { return __awaiter(_this, void 0, void 0, function () {
             var _this = this;
@@ -146,7 +147,9 @@ var StoreController = /** @class */ (function () {
                     var rest = _.omit(parent, key);
                     return rest;
                 }
+                ;
             }
+            ;
             var child = _this._removeNestedItem(currentLayer, pathArray.slice(1), blacklist);
             return __assign(__assign({}, parent), (_b = {}, _b[key] = __assign({}, child), _b));
         };
@@ -159,7 +162,7 @@ var StoreController = /** @class */ (function () {
             return [2 /*return*/, Promise.resolve().then(this.clear)];
         }); }); };
         this.getSize = function () {
-            var store = localStorage.getItem(_this.root);
+            var store = localStorage.getItem(_this.root) || '{}';
             var spaceUsed = ((store.length * 16) / (8 * 1024));
             alert("\n        Store length:\n          " + (store.length > 2 ? store.length : 0) + " characters\n\n        Approximate space used:\n          " + (store.length > 2 ? spaceUsed.toFixed(2) + " KB" : "Empty (0 KB)") + "\n\n        Approximate space remaining:\n          " + (store.length > 2 ? (5120 - spaceUsed).toFixed(2) + " KB" : "5 MB") + "\n      ");
         };
@@ -169,4 +172,5 @@ var StoreController = /** @class */ (function () {
     }
     return StoreController;
 }());
+exports.StoreController = StoreController;
 exports.nodux = new StoreController();

@@ -1,9 +1,13 @@
-import React from 'react';
+import * as React from 'react';
 import {nodux as store} from '@no-dux/core'
 
 export const nodux = store;
 
-export const useStore = (path?: string | string[]) => {
+interface WatchList {
+  [key: string]: any
+}
+
+export const useStore = (path?: string | string[]): WatchList => {
   const [watchlist, setWatchlist] = React.useState({});
 
   React.useEffect(() => {
@@ -16,4 +20,5 @@ export const useStore = (path?: string | string[]) => {
     return () => document.removeEventListener('watch:store-update', () => onStore)
 
   }, [])
+  return watchlist
 }

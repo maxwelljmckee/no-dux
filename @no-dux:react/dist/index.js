@@ -3,18 +3,18 @@
 exports.__esModule = true;
 exports.useStore = exports.nodux = void 0;
 
-var react_1 = require("react");
+var React = require("react");
 
 var core_1 = require("@no-dux/core");
 
 exports.nodux = core_1.nodux;
 
 var useStore = function useStore(path) {
-  var _a = react_1["default"].useState({}),
+  var _a = React.useState({}),
       watchlist = _a[0],
       setWatchlist = _a[1];
 
-  react_1["default"].useEffect(function () {
+  React.useEffect(function () {
     var onStore = function onStore(e) {
       console.log('store event fired', e);
     };
@@ -26,6 +26,7 @@ var useStore = function useStore(path) {
       });
     };
   }, []);
+  return watchlist;
 };
 
 exports.useStore = useStore;
