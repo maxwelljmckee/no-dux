@@ -1,24 +1,55 @@
-import * as React from 'react';
-import {nodux as store} from '@no-dux/core'
+import React from "react";
+import { nodux } from "@no-dux/core";
 
-export const nodux = store;
-
-interface WatchList {
-  [key: string]: any
-}
-
-export const useStore = (path?: string | string[]): WatchList => {
+export const useStore = (path) => {
   const [watchlist, setWatchlist] = React.useState({});
 
+  const pathList = React.useMemo(
+    () => (typeof path === "string" ? [path] : path),
+    // eslint-disable-next-line
+    []
+  );
+
   React.useEffect(() => {
-    const onStore = (e) => {
-      console.log('store event fired', e)
-    }
+    const initializeWatchlist = () => {
+      if (!path) return setWatchlist(nodux.getStore());
+      setWatchlist(
+        pathList.reduce((acc, key) => {
+          return {
+            ...acc,
+            [key]: nodux.getItem(key),
+          };
+        }, {})
+      );
+    };
 
-    document.addEventListener('watch:store-update', onStore)
+    initializeWatchlist();
+    // eslint-disable-next-line
+  }, []);
 
-    return () => document.removeEventListener('watch:store-update', () => onStore)
+  React.useEffect(() => {
+    const onStoreUpdate = (event) => {
+      if (!path) return setWatchlist(nodux.getStore());
+      const modified = event.detail;
+      Object.keys(watchlist).forEach((key) => {
+        if (modified.startsWith(key)) {
+          setWatchlist({ ...watchlist, [key]: nodux.getItem(key) });
+        }
+      });
+    };
 
-  }, [])
-  return watchlist
-}
+    document.addEventListener("watch:store-update", onStoreUpdate);
+    return () => {
+      document.removeEventListener("watch:store-update", onStoreUpdate);
+    };
+
+    // eslint-disable-next-line
+  }, [watchlist]);
+
+  return !path
+    ? watchlist
+    : Object.keys(watchlist).reduce((acc, key) => {
+        const trimmed = key.split(".").pop();
+        return { ...acc, [trimmed]: watchlist[key] };
+      }, {});
+};
