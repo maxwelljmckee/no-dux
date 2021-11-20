@@ -65,6 +65,14 @@ export class StoreController {
     return Promise.resolve().then(() => this.setItem(path, item));
   }
 
+  // silentUpdate is same as setItem without the event dispatch
+  silentUpdate = (path: string | string[], item: any): void => {
+    const store = this.getStore();
+    const { pathArray, pathString } = this._parsePath(path);
+    const nextStore = this._updateNestedItem(store, pathArray, item);
+    localStorage.setItem(this.root, JSON.stringify(nextStore));
+  }
+
   // recursively overwrite the value of a nested store item
   private _updateNestedItem = (parent: object, pathArray: string[], item: any): object => {
     const key = pathArray[0];

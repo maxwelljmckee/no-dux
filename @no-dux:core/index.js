@@ -101,6 +101,13 @@ var StoreController = /** @class */ (function () {
                 return [2 /*return*/, Promise.resolve().then(function () { return _this.setItem(path, item); })];
             });
         }); };
+        // silentUpdate is same as setItem without the event dispatch
+        this.silentUpdate = function (path, item) {
+            var store = _this.getStore();
+            var _a = _this._parsePath(path), pathArray = _a.pathArray, pathString = _a.pathString;
+            var nextStore = _this._updateNestedItem(store, pathArray, item);
+            localStorage.setItem(_this.root, JSON.stringify(nextStore));
+        };
         // recursively overwrite the value of a nested store item
         this._updateNestedItem = function (parent, pathArray, item) {
             var _a, _b, _c;
