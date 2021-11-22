@@ -7,15 +7,15 @@ interface CreateStoreParams {
   config?: object,
 }
 
-interface ShapelessObject {
+interface UnknownObject {
   [key: string]: any;
 }
 
 
 export class StoreController {
   root: string;
-  config: ShapelessObject;
-  actions: ShapelessObject;
+  config: UnknownObject;
+  actions: UnknownObject;
 
   constructor() {
     this.root = "root";
@@ -38,7 +38,7 @@ export class StoreController {
     return { pathArray, pathString };
   };
 
-  createActions = (newActions: object): void => {
+  registerActions = (newActions: object): void => {
     this.actions = { ...this.actions, ...newActions };
   };
 
