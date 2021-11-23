@@ -33,7 +33,6 @@ var _omit = function (object, blacklist) {
     return target;
 };
 var _get = function (object, path, defaultValue) {
-    console.log('in working get function');
     var pathArray = typeof path === 'string' ? path.split('.') : path;
     var target = object;
     while (pathArray.length) {

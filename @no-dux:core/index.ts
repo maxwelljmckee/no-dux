@@ -15,7 +15,6 @@ const _omit = (object: object, blacklist: string | string[]): any => {
 };
 
 const _get = (object: object, path: string | string[], defaultValue?: any): any => {
-  console.log('in working get function')
   const pathArray = typeof path === 'string' ? path.split('.') : path
   let target: any = object;
   while (pathArray.length) {
