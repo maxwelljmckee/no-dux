@@ -1,5 +1,32 @@
-const _ = require('lodash');
+const _omit = (object: object, blacklist: string | string[]): any => {
+  let target: any;
+  if (typeof blacklist === "string") {
+    target = Object.keys(object).reduce((acc, key) => {
+      if (key !== blacklist) return { ...acc, [key]: object[key] };
+      return acc;
+    }, {});
+  } else if (Array.isArray(blacklist)) {
+    target = Object.keys(object).reduce((acc, key) => {
+      if (!blacklist.includes(key)) return { ...acc, [key]: object[key] };
+      return acc;
+    }, {});
+  }
+  return target;
+};
 
+export const _get = (object: object, path: string | string[], defaultValue?: any): any => {
+  const pathArray = typeof path === 'string' ? path.split('.') : path
+  let target: any = object;
+  while (pathArray.length) {
+    const nextKey = pathArray.shift()
+    if (target.hasOwnProperty(nextKey)) {
+      target = target[nextKey];
+      continue;
+    }
+    return defaultValue
+  }
+  return target
+}
 
 interface CreateStoreParams {
   root?: string,
@@ -23,6 +50,7 @@ export class StoreController {
     this.actions = {};
   }
 
+  // initialize store root on app load
   createStore = ({root = 'root', defaults = {}, config = {}}: CreateStoreParams = {}): void => {
     if (root !== 'root') this.root = root;
     if (config) this.config = config;
@@ -32,40 +60,27 @@ export class StoreController {
     };
   };
 
-  private _parsePath = (path: string | string[]) => {
-    const pathArray = (typeof path === 'string') ? path.split('.') : path;
-    const pathString = (typeof path === 'string') ? path : path.join('.');
-    return { pathArray, pathString };
-  };
-
+  // add normalized actions to the action registry
   registerActions = (newActions: object): void => {
     this.actions = { ...this.actions, ...newActions };
   };
 
   // fetch whole store
   getStore = (): object => JSON.parse(localStorage.getItem(this.root) || '');
-  getStoreAsync = async (): Promise<object> => Promise.resolve().then(this.getStore);
 
-  // fetch a particular item from store
-  getItem = (path: string | string[]): any => _.get(JSON.parse(localStorage.getItem(this.root) || ''), path);
-  getItemAsync = async (path: string | string[]): Promise<any> => Promise.resolve().then(() => this.getItem(path))
+  // fetch item from a path
+  getItem = (path: string | string[]): any => _get(JSON.parse(localStorage.getItem(this.root) || ''), path);
 
-  // spread an object into a particular path
+  // merge or set an item at a path
   setItem = (path: string | string[], item: any): void => {
     const store = this.getStore();
     const { pathArray, pathString } = this._parsePath(path)
-
     const nextStore = this._updateNestedItem(store, pathArray, item);
-
     localStorage.setItem(this.root, JSON.stringify(nextStore));
     document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathString }));
   };
 
-  setItemAsync = async (path: string | string[], item: any) => {
-    return Promise.resolve().then(() => this.setItem(path, item));
-  }
-
-  // silentUpdate is same as setItem without the event dispatch
+  // silentUpdate sets an item without dispatching an event
   silentUpdate = (path: string | string[], item: any): void => {
     const store = this.getStore();
     const { pathArray, pathString } = this._parsePath(path);
@@ -76,15 +91,13 @@ export class StoreController {
   // recursively overwrite the value of a nested store item
   private _updateNestedItem = (parent: object, pathArray: string[], item: any): object => {
     const key = pathArray[0];
-    const currentLayer = _.get(parent, `${key}`, {});
-
+    const currentLayer = _get(parent, `${key}`, {});
     if (pathArray.length === 1) {
       if (typeof item === "object" && !Array.isArray(item)) {
         return { ...parent, [key]: { ...currentLayer, ...item } };
       };
       return { ...parent, [key]: item };
     };
-
     const child = this._updateNestedItem(
       currentLayer,
       pathArray.slice(1),
@@ -97,33 +110,25 @@ export class StoreController {
   removeItem = (path: string | string[], blacklist?: string | string[]): void => {
     const store = this.getStore();
     const { pathArray, pathString } = this._parsePath(path);
-
     const nextStore = this._removeNestedItem(store, pathArray, blacklist);
-
     localStorage.setItem(this.root, JSON.stringify(nextStore));
     document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathString }));
-  };
-
-  removeItemAsync = async (path: string | string[], blacklist?: string | string[]) => {
-    return Promise.resolve().then(() => this.removeItem(path, blacklist));
   };
 
   // recursively remove a nested store item
   private _removeNestedItem = (parent: object, pathArray: string[], blacklist?: string | string[]): object => {
     const key = pathArray[0];
-    const currentLayer = _.get(parent, `${key}`);
-    if (!currentLayer) throw new Error(`KeyError: key-name "${key}" not found`);
-
+    const currentLayer = _get(parent, `${key}`);
+    if (!currentLayer) throw new Error(`KeyError: Invalid keyName "${key}" in object path`);
     if (pathArray.length === 1) {
       if (blacklist) {
-        const rest = _.omit(currentLayer, blacklist);
+        const rest = _omit(currentLayer, blacklist);
         return { ...parent, [key]: rest };
       } else {
-        const rest = _.omit(parent, key);
+        const rest = _omit(parent, key);
         return rest;
       };
     };
-
     const child = this._removeNestedItem(
       currentLayer,
       pathArray.slice(1),
@@ -137,8 +142,6 @@ export class StoreController {
     localStorage.setItem(this.root, JSON.stringify({}));
     document.dispatchEvent(new CustomEvent('watch:store-update', { detail: 'clear' }));
   };
-
-  clearAsync = async () => Promise.resolve().then(this.clear);
 
   getSize = () => {
       const store = localStorage.getItem(this.root) || '{}';
@@ -154,6 +157,12 @@ export class StoreController {
           ${store.length > 2 ? (5120 - spaceUsed).toFixed(2) + " KB": "5 MB"}
       `);
   }
+
+  private _parsePath = (path: string | string[]) => {
+    const pathArray = (typeof path === 'string') ? path.split('.') : path;
+    const pathString = (typeof path === 'string') ? path : path.join('.');
+    return { pathArray, pathString };
+  };
 }
 
 
