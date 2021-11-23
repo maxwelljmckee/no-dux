@@ -11,7 +11,7 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 exports.__esModule = true;
-exports.nodux = exports.StoreController = exports._get = void 0;
+exports.nodux = exports.StoreController = void 0;
 var _omit = function (object, blacklist) {
     var target;
     if (typeof blacklist === "string") {
@@ -45,7 +45,6 @@ var _get = function (object, path, defaultValue) {
     }
     return target;
 };
-exports._get = _get;
 var StoreController = /** @class */ (function () {
     function StoreController() {
         var _this = this;
@@ -69,7 +68,7 @@ var StoreController = /** @class */ (function () {
         // fetch whole store
         this.getStore = function () { return JSON.parse(localStorage.getItem(_this.root) || ''); };
         // fetch item from a path
-        this.getItem = function (path) { return (0, exports._get)(JSON.parse(localStorage.getItem(_this.root) || ''), path); };
+        this.getItem = function (path) { return _get(JSON.parse(localStorage.getItem(_this.root) || ''), path); };
         // merge or set an item at a path
         this.setItem = function (path, item) {
             var store = _this.getStore();
@@ -89,7 +88,7 @@ var StoreController = /** @class */ (function () {
         this._updateNestedItem = function (parent, pathArray, item) {
             var _a, _b, _c;
             var key = pathArray[0];
-            var currentLayer = (0, exports._get)(parent, "" + key, {});
+            var currentLayer = _get(parent, "" + key, {});
             if (pathArray.length === 1) {
                 if (typeof item === "object" && !Array.isArray(item)) {
                     return __assign(__assign({}, parent), (_a = {}, _a[key] = __assign(__assign({}, currentLayer), item), _a));
@@ -113,7 +112,7 @@ var StoreController = /** @class */ (function () {
         this._removeNestedItem = function (parent, pathArray, blacklist) {
             var _a, _b;
             var key = pathArray[0];
-            var currentLayer = (0, exports._get)(parent, "" + key);
+            var currentLayer = _get(parent, "" + key);
             if (!currentLayer)
                 throw new Error("KeyError: Invalid keyName \"" + key + "\" in object path");
             if (pathArray.length === 1) {

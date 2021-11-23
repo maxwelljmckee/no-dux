@@ -14,7 +14,7 @@ const _omit = (object: object, blacklist: string | string[]): any => {
   return target;
 };
 
-export const _get = (object: object, path: string | string[], defaultValue?: any): any => {
+const _get = (object: object, path: string | string[], defaultValue?: any): any => {
   const pathArray = typeof path === 'string' ? path.split('.') : path
   let target: any = object;
   while (pathArray.length) {
