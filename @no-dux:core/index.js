@@ -33,15 +33,14 @@ var _omit = function (object, blacklist) {
     return target;
 };
 var _get = function (object, path, defaultValue) {
+    console.log('in working get function');
     var pathArray = typeof path === 'string' ? path.split('.') : path;
     var target = object;
     while (pathArray.length) {
         var nextKey = pathArray.shift();
-        if (target.hasOwnProperty(nextKey)) {
-            target = target[nextKey];
-            continue;
-        }
-        return defaultValue;
+        if (!target.hasOwnProperty(nextKey))
+            return defaultValue;
+        target = target[nextKey];
     }
     return target;
 };
