@@ -1,29 +1,34 @@
 # `no-dux`
 A ridiculously lightweight and easy-to-use state management alternative to Redux
 
-- <a name='Why no-dux'>[Why no-dux](#why-no-dux)</a>
+<!-- - <a name='Why no-dux'>[Why no-dux](#why-no-dux)</a>
 - <a name='getting-started'>[Getting Started](#getting-started)</a>
-- <a name='api-documentation'>[API Documentation](#api-documentation)</a>
-- <a name='react-hooks-api'>[React Hooks API](#react-hooks-api)</a>
+- <a name='api-documentation'>[API Documentation](#core-api)</a>
+- <a name='react-hooks-api'>[React Hooks API](#react-hooks-api)</a> -->
+- [Why no-dux](#why-no-dux)
+- [Getting Started](#getting-started)
+- [Core API](#core-api)
+- [Nodux Actions](#no-dux-actions)
+- [React Hooks API](#react-hooks-api)
 
 # Why `no-dux`?
-Many of you have probably used Redux in the past, and if you're like me your overall reaction was probably mostly positive. What a great tool, you thought, but why does it have so much boilerplate? And why does my data disappear on a page reload? Sure I can chuck it in localStorage to persist, but then I'm clogging up memory with unnecessary duplication.
+## You're looking for a new state management solution
+Many of you have probably used Redux in the past, and if you're like me your overall reaction was probably mostly positive. What a great tool, you thought, but why does it have so much boilerplate? And why does my data disappear on a page reload? Sure I can chuck it in localStorage to persist, but then I'm clogging up memory with unnecessary duplication. And what if I don't want a rerender every time a change is made to global state?
 
-## Enter `no-dux`
-We have
+<br />
 
-## What are some benefits of using `no-dux`?
+## What makes `no-dux` different?
 - It is aggressively easy to set up, learn, and use
-- It reduces your application's boilerplate
+- It reduces your application's boilerplate and memory overhead
 - It handles data persistence over page reload (and over user sessions) without additional configuration or libraries
-- Stateful rerender is 100% opt-in, giving you back control of your application's performance
-- The core library is 100% framework agnostic, and its unpacked bundle size is only _**14kb**_ with _**zero dependencies**_!!
+- **Stateful rerender is 100% opt-in**, giving you back control of your application's performance
+- The core library is 100% framework agnostic, and its **unpacked bundle size is only _14kb_ with _zero dependencies_**!!
 
-## Why is it different?
 Most importantly, `no-dux` makes it easy to set and remove **deeply nested** data in your browser's localStorage. The browser's native localStorage tool generally has a use-case not too distant from it's cousin, cookies –– sure, you can store things like JSONified objects in there, but it's basically just a list of key-value pairs. With `no-dux`, you enter your store through a single root node in your localStorage, and from there you can build a data-tree structure as large and complex as your application. We take care of the nesting and the JSON parsing for you!
 
-# Getting Started
+<br />
 
+# Getting Started
 If you're working on a React application, you'll likely want to download the `no-dux` extension that comes with some handy state-management hooks:
 
 ```
@@ -42,6 +47,8 @@ or
 
 yarn add @no-dux/core
 ```
+
+<br />
 
 # Core API
 ## Setup
@@ -202,7 +209,7 @@ Suppose we want to remove the `randomThing` property from our `user` object. Hey
 
 Any time we only want to remove a single item, we can specify `blacklist` as a simple string, rather than an array of strings, like this:
 ```js
-nodux.removeItem('user', 'randomThing);
+nodux.removeItem('user', 'randomThing');
 ```
 Super! Now that we've removed our user's session data and that random thing, our store should look like this:
 ```js
@@ -300,7 +307,7 @@ nodux.getSize()
 
 <br />
 
-# no-dux Actions
+# Nodux Actions
 Super! We're finally ready to talk about `actions`!
 
 At this point, many of you may be thinking, "it's true, Redux boilerplate is a pain, but one thing I do like is the way the dispatch => action => reducer pattern normalizes my actions into reuseable state update functions. Does no-dux provide a solution for action normalization?"
