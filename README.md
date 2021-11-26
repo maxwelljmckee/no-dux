@@ -5,15 +5,18 @@ A ridiculously lightweight and easy-to-use state management alternative
 - [Getting Started](#getting-started)
 - [Core API](#core-api)
   - [createStore](#createstore)
-  - [setItem](#setitem)
-  - [removeItem](#removeitem)
-  - [getStore](#getstore)
-  - [getItem](#getitem)
-  - [getSize](#getsize)
-- [Nodux Actions](#nodux-actions)
-  - [registerAction](#registeraction)
-  - [Calling Your Actions](#calling-your-actions)
-  - [Scalability](#scalability)
+  - [Data Setters](#data-setters)
+    - [setItem](#setitem)
+    - [removeItem](#removeitem)
+    - [clear](#clear)
+  - [Data Getters](#data-getters)
+    - [getStore](#getstore)
+    - [getItem](#getitem)
+    - [getSize](#getsize)
+  - [Nodux Actions](#nodux-actions)
+    - [registerAction](#registeraction)
+    - [Calling Your Actions](#calling-your-actions)
+    - [Scalability](#scalability)
 - [React Hooks API](#react-hooks-api)
   - [useStore](#usestore)
   - [useAutosave](#useautosave)
@@ -33,6 +36,11 @@ Many of you have probably used Redux in the past, and if you're like me your ove
 
 <br />
 
+[back to top](#no-dux)
+
+<br />
+
+
 # How does it work ?
 Instead of overengineering complex solutions to data-persistence, `no-dux` works by extending the browser's native data-persistence through the `localStorage` api.
 
@@ -41,6 +49,11 @@ Most developers probably think of `localStorage` as a glorified set of key-value
 `no-dux` opens up a new world of possibility by making it easy to set and remove **deeply nested** data in your browser's localStorage. With `no-dux`, you enter your store through a single root node in your localStorage, and from there you can build a data-tree structure as large and complex as your application. We take care of the nesting and the JSON parsing for you!
 
 <br />
+
+[back to top](#no-dux)
+
+<br />
+
 
 # Getting Started
 If you're working on a React application, you'll likely want to download the `no-dux` extension that comes with some handy state-management hooks:
@@ -63,6 +76,11 @@ or
 ```
 yarn add @no-dux/core
 ```
+
+<br />
+
+
+[back to top](#no-dux)
 
 <br />
 
@@ -97,6 +115,11 @@ demoApp: {
 ```
 
 <br />
+
+[back to top](#no-dux)
+
+<br />
+
 
 # createStore
 ### `nodux.createStore({ root?: string })`
@@ -171,6 +194,11 @@ demoApp: {
 ```
 
 <br />
+
+[back to top](#no-dux)
+
+<br />
+
 
 # removeItem
 ### `nodux.removeItem(path: string | string[], blacklist?: string | string[])`
@@ -280,6 +308,11 @@ demoApp: {
 
 <br />
 
+[back to top](#no-dux)
+
+<br />
+
+
 # clear
 ### `nodux.clear()`
 <br />
@@ -296,7 +329,11 @@ demoApp: {}
 ```
 
 <br />
+
+[back to top](#no-dux)
+
 <br />
+
 
 # Data Getters
 So we've learned how to set and remove data from our store, but what if we just want to take a peek inside and see what's there? That's where **getters** come in! Let's go back to an earlier version of our store example to learn about getters:
@@ -333,6 +370,11 @@ demoApp: {
 
 <br />
 
+[back to top](#no-dux)
+
+<br />
+
+
 # getStore
 ### `nodux.getStore()`
 <br />
@@ -346,6 +388,11 @@ Easy! Now you have the whole store and you can get whatever you need.
 **IMPORTANT**: this method provides a snapshot of the store on page-load, but it will not receive stateful updates of the store as changes are made. To hook into stateful updates, you'll need to use the React extension, documented [here](#react-hooks-api).
 
 <br />
+
+[back to top](#no-dux)
+
+<br />
+
 
 # getItem
 ### `nodux.getItem(path: string | string[])`
@@ -361,6 +408,11 @@ Again, like `getStore`, `getItem` _**will not**_ provide stateful updates. For t
 
 <br />
 
+[back to top](#no-dux)
+
+<br />
+
+
 # getSize
 ### `nodux.getSize()`
 <br />
@@ -374,6 +426,11 @@ nodux.getSize()
 
 <br />
 
+[back to top](#no-dux)
+
+<br />
+
+
 # Nodux Actions
 Super! We're finally ready to talk about `actions`!
 
@@ -386,6 +443,11 @@ The answer to this question is **no-dux actions**!
 Using actions, you'll have reuseable state-update methods that you can call from anywhere in your application, keeping your code DRY and maintainable.
 
 <br />
+
+[back to top](#no-dux)
+
+<br />
+
 
 # registerActions
 ### `nodux.registerActions`
@@ -442,7 +504,11 @@ createUserActions();
 Simple as that! Now our actions will be available through nodux from anywhere in our application.
 
 <br />
+
+[back to top](#no-dux)
+
 <br />
+
 
 # Calling Your Actions
 Now that you have registered your actions with no-dux and called them at the top of your application, what should you do when you want to use them in a module? Easy, you have access to them through nodux:
@@ -468,7 +534,11 @@ const MyModule = () => {
 ```
 
 <br />
+
+[back to top](#no-dux)
+
 <br />
+
 
 # Scalability
 As our applications grow, we may find ourselves with a ballooning number of actions-creator modules, resulting in a growing list of actions-creator calls in our top level application module:
@@ -528,7 +598,11 @@ createStoreActions();
 Ahh, now doesn't that feel better?
 
 <br />
+
+[back to top](#no-dux)
+
 <br />
+
 
 # React Hooks API
 One of the most exciting features of `no-dux` is that it gives you 100% complete control of your component rerenders. That's because all store updates happen the background unless you opt-in to listening for store updates.
@@ -568,6 +642,11 @@ demoApp: {
 ```
 
 <br />
+
+[back to top](#no-dux)
+
+<br />
+
 
 # useStore
 ### `useStore(path?: string | string[])`
@@ -623,6 +702,11 @@ In this example, component state only updates when the `user.name` property or t
 - When collisions occur it is recommended to simply listen for updates to a different layer of your data-tree
 
 <br />
+
+[back to top](#no-dux)
+
+<br />
+
 
 # useAutosave
 ### `useAutosave(path: string | string[], whitelist: object, blacklist?: string | string[])`
@@ -703,6 +787,11 @@ Okay this isn't terrible, but supposing you have a scenario need to use multiple
 useAutosave('blacklistExample', {...complexObject1, ...complexObject2 }, ['sensitiveThing1', 'sensitiveThing2', 'sensitiveThing3'])
 ```
 
+[back to top](#no-dux)
+
+<br />
+
+
 <br />
 <br />
 <br />
@@ -710,8 +799,6 @@ useAutosave('blacklistExample', {...complexObject1, ...complexObject2 }, ['sensi
 
 To Do List:
 - spread into an array
-- back to top navigation
-- debug api navigation
 - intermediate cases
   - avoiding data-loss
   - Variable interpolation into a path
