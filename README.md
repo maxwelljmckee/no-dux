@@ -9,7 +9,7 @@ A ridiculously lightweight and easy-to-use state management alternative
 
 # Why `no-dux`?
 ## You're looking for a new state management solution
-Many of you have probably used Redux in the past, and if you're like me your overall reaction was probably mostly positive. What a great tool, you thought, but why does it have so much boilerplate? And why does my data disappear on a page reload? Sure I can chuck it in localStorage to persist, but then I'm clogging up memory with unnecessary duplication. And what if I don't want a rerender every time a change is made to global state?
+Many of you have probably used Redux in the past, and if you're like me your overall reaction was probably mostly positive. What a great tool, you thought, but why does it have so much boilerplate? And why does my data disappear on a page reload? Sure I can chuck it in localStorage to persist, but then I'm clogging up memory with unnecessary duplication. What the heck is a reducer anyway? And what if I don't want a rerender every time a change is made to global state?
 
 <br />
 
@@ -23,7 +23,7 @@ Many of you have probably used Redux in the past, and if you're like me your ove
 <br />
 
 # How does it work ?
-Instead of overengineering complex solutions to data-persistence, `no-dux` extends the browser's native data-persistence through the `localStorage` api.
+Instead of overengineering complex solutions to data-persistence, `no-dux` works by extending the browser's native data-persistence through the `localStorage` api.
 
 Most developers probably think of `localStorage` as a glorified set of key-value pairs. It's fine for storing a few odds and ends, but it's not powerful or flexible enough to meet your application's state-management needs.
 
@@ -41,6 +41,8 @@ or
 ```
 yarn add @no-dux/react
 ```
+
+<br />
 
 If you'd rather download the core module, you can use:
 ```
@@ -82,6 +84,8 @@ demoApp: {
 
 };
 ```
+
+<br />
 
 ### `nodux.createStore({ root?: string })`
 The first thing we'll need to do is instantiate our store somewhere near the top level of our application. That looks like this:
@@ -253,6 +257,8 @@ demoApp: {
 };
 ```
 
+<br />
+
 ### `nodux.clear()`
 This one is pretty straightforward. Use nodux.clear when you want to scrap the entire store and return an empty object at your root node. That looks like this:
 ```js
@@ -268,7 +274,7 @@ demoApp: {}
 <br />
 
 ## Data Getters
-So we've learned how to set and remove data from our store, but what if we just want to take a peek inside and see what's there? That's where `getters` come in! Let's go back to an earlier version of our store example to learn about getters:
+So we've learned how to set and remove data from our store, but what if we just want to take a peek inside and see what's there? That's where **getters** come in! Let's go back to an earlier version of our store example to learn about getters:
 ```js
 // store
 
@@ -299,6 +305,9 @@ demoApp: {
 
 };
 ```
+
+<br />
+
 ### `nodux.getStore()`
 This one is pretty straightforward. It simply returns the entire store! That looks like this:
 ```js
@@ -334,13 +343,13 @@ nodux.getSize()
 # Nodux Actions
 Super! We're finally ready to talk about `actions`!
 
-At this point, many of you may be thinking, "it's true, Redux boilerplate is a pain, but one thing I do like is the way the dispatch => action => reducer pattern normalizes my actions into reuseable state update methods. I can dispatch the same action from anywhere in my application and get a reliable result. Does no-dux provide a similar solution for action normalization?"
+At this point, many of you may be thinking, "it's true, Redux boilerplate is a pain, but one thing I do like is the way the `dispatch => action => reducer` pattern normalizes my actions into reuseable state update methods. I can dispatch the same action from anywhere in my application and get a reliable result. Does no-dux provide a similar solution for action normalization?"
 
 <br />
 
-The answer to this question is no-dux actions!
+The answer to this question is **no-dux actions**!
 
-Using actions, you'll have reuseable state-update methods that you can use from anywhere in your application, keeping your code DRY and maintainable.
+Using actions, you'll have reuseable state-update methods that you can call from anywhere in your application, keeping your code DRY and maintainable.
 
 <br />
 
@@ -383,7 +392,7 @@ const setUserData = (payload) => {
   nodux.setItem('path', updatedPayload);
 }
 ```
-Awesome! The last step to ensure that you have access to your actions throughout your application is to take your brand new `createUserActions` function, and call it somewhere near the top level of your application. Right next to `createStore` ought to be a good spot:
+Awesome! The last step to ensure that you have access to your actions throughout your application is to take your handy new `createUserActions` function, and call it somewhere near the top level of your application. Right next to `createStore` ought to be a good spot:
 ```js
 // top level module
 
