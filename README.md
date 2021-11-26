@@ -36,11 +36,6 @@ Many of you have probably used Redux in the past, and if you're like me your ove
 
 <br />
 
-[back to top](#no-dux)
-
-<br />
-
-
 # How does it work ?
 Instead of overengineering complex solutions to data-persistence, `no-dux` works by extending the browser's native data-persistence through the `localStorage` api.
 
