@@ -14,7 +14,7 @@ A ridiculously lightweight and easy-to-use state management alternative
     - [getItem](#getitem)
     - [getSize](#getsize)
   - [Nodux Actions](#nodux-actions)
-    - [registerAction](#registeraction)
+    - [registerActions](#registeractions)
     - [Calling Your Actions](#calling-your-actions)
     - [Scalability](#scalability)
 - [React Hooks API](#react-hooks-api)
@@ -23,7 +23,7 @@ A ridiculously lightweight and easy-to-use state management alternative
 
 # Why `no-dux`?
 ## You're looking for a new state management solution
-Many of you have probably used Redux in the past, and if you're like me your overall reaction was probably mostly positive. What a great tool, you thought, but why does it have so much boilerplate? And why does my data disappear on a page reload? Sure I can chuck it in localStorage to persist, but then I'm clogging up memory with unnecessary duplication. What the heck is a reducer anyway? And what if I don't want a rerender every time a change is made to global state?
+Many of you have probably used Redux in the past, and if you're like me your overall reaction was probably mostly positive. What a great tool, you thought, but why does it have so much boilerplate? And why does my data disappear on a page reload? Sure I can chuck it in localStorage to persist, but then I'm clogging up memory with unnecessary duplication. And what the heck is a reducer anyway? And what if I don't want a rerender every time a change is made to global state?
 
 <br />
 
@@ -111,11 +111,6 @@ demoApp: {
 
 <br />
 
-[back to top](#no-dux)
-
-<br />
-
-
 # createStore
 ### `nodux.createStore({ root?: string })`
 <br />
@@ -130,6 +125,9 @@ nodux.createStore({ root: 'demoApp' });
 - The value of `root` will be used as the name for the root node of store's data-tree. If no value is provided, the name will default to "root"
 
 <br />
+
+[back to top](#no-dux)
+
 <br />
 
 # Data Setters
@@ -365,11 +363,6 @@ demoApp: {
 
 <br />
 
-[back to top](#no-dux)
-
-<br />
-
-
 # getStore
 ### `nodux.getStore()`
 <br />
@@ -438,11 +431,6 @@ The answer to this question is **no-dux actions**!
 Using actions, you'll have reuseable state-update methods that you can call from anywhere in your application, keeping your code DRY and maintainable.
 
 <br />
-
-[back to top](#no-dux)
-
-<br />
-
 
 # registerActions
 ### `nodux.registerActions`
@@ -638,11 +626,6 @@ demoApp: {
 
 <br />
 
-[back to top](#no-dux)
-
-<br />
-
-
 # useStore
 ### `useStore(path?: string | string[])`
 <br />
@@ -661,8 +644,10 @@ Using the `path` argument of the `useStore` hook allows you to be more specific 
 
 const { user } = useStore('user');
 
-nodux.setItem('uiSettings', { darkTheme: false }); // => does not update component state
+nodux.setItem('uiSettings', { darkTheme: false }); // => DOES NOT update component state
+
 nodux.setItem('user', { name: 'guyDude' }); // => updates component state
+
 nodux.setItem('user.pet', { name: 'Bibo the best cat ever' }); // => updates component state
 ```
 Okay, this is better. Now the store only updates when changes are made to the `user` property of our store. Let's take it one step further see just how specific we can get!
@@ -672,9 +657,12 @@ Okay, this is better. Now the store only updates when changes are made to the `u
 
 const { type: petType } = useStore('user.pet.type');
 
-nodux.setItem('uiSettings', { darkTheme: false }); // => does not update component state
-nodux.setItem('user', { name: 'guyDude' }); // => does not update component state
-nodux.setItem('user.pet', { name: 'Bibo the best cat ever' }); // => does not update component state
+nodux.setItem('uiSettings', { darkTheme: false }); // => DOES NOT update component state
+
+nodux.setItem('user', { name: 'guyDude' }); // => DOES NOT update component state
+
+nodux.setItem('user.pet', { name: 'Bibo the best cat ever' }); // => DOES NOT update component state
+
 nodux.setItem('user.pet', { type: 'alligator' }); // => only this updates component state
 ```
 Great! Now we have a super specific state update that targets a leaf-node of our data-tree. You can see that I am aliasing `type` as `petType`, in case I want to be more descriptive with my naming.
