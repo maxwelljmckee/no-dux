@@ -4,11 +4,19 @@ A ridiculously lightweight and easy-to-use state management alternative
 - [Why no-dux](#why-no-dux)
 - [Getting Started](#getting-started)
 - [Core API](#core-api)
-  - [nodux.createStore](#`nodux.createStore`)
+  - [createStore](#createstore)
+  - [setItem](#setitem)
+  - [removeItem](#removeitem)
+  - [getStore](#getstore)
+  - [getItem](#getitem)
+  - [getSize](#getsize)
 - [Nodux Actions](#nodux-actions)
+  - [registerAction](#registeraction)
   - [Calling Your Actions](#calling-your-actions)
   - [Scalability](#scalability)
 - [React Hooks API](#react-hooks-api)
+  - [useStore](#usestore)
+  - [useAutosave](#useautosave)
 
 # Why `no-dux`?
 ## You're looking for a new state management solution
@@ -90,7 +98,10 @@ demoApp: {
 
 <br />
 
+# createStore
 ### `nodux.createStore({ root?: string })`
+<br />
+
 The first thing we'll need to do is instantiate our store somewhere near the top level of our application. That looks like this:
 ```js
 import { nodux } from '@no-dux/core';
@@ -101,9 +112,13 @@ nodux.createStore({ root: 'demoApp' });
 - The value of `root` will be used as the name for the root node of store's data-tree. If no value is provided, the name will default to "root"
 
 <br />
+<br />
 
-## Data Setters
+# Data Setters
+# setItem
 ### `nodux.setItem(path: string | string[], item: string | object)`
+<br />
+
 Suppose our user has a pet that we would like to remember. We would get that information from the user and set it in our store like this:
 ```js
 import { nodux } from '@no-dux/core';
@@ -157,7 +172,10 @@ demoApp: {
 
 <br />
 
+# removeItem
 ### `nodux.removeItem(path: string | string[], blacklist?: string | string[])`
+<br />
+
 Now, suppose our user decides they want to logout or end their current session. We'll probably want to remove any relevant auth information from the store.
 To remove an item from our store, we need to provide a path to the item so `no-dux` knows where to look for it. The `blacklist` argument can be a string, an array of strings, or nothing! Let's explore the possibilities:
 ```js
@@ -262,7 +280,10 @@ demoApp: {
 
 <br />
 
+# clear
 ### `nodux.clear()`
+<br />
+
 This one is pretty straightforward. Use nodux.clear when you want to scrap the entire store and return an empty object at your root node. That looks like this:
 ```js
 nodux.clear();
@@ -275,8 +296,9 @@ demoApp: {}
 ```
 
 <br />
+<br />
 
-## Data Getters
+# Data Getters
 So we've learned how to set and remove data from our store, but what if we just want to take a peek inside and see what's there? That's where **getters** come in! Let's go back to an earlier version of our store example to learn about getters:
 ```js
 // store
@@ -311,7 +333,10 @@ demoApp: {
 
 <br />
 
+# getStore
 ### `nodux.getStore()`
+<br />
+
 This one is pretty straightforward. It simply returns the entire store! That looks like this:
 ```js
 const store = nodux.getStore();
@@ -322,7 +347,10 @@ Easy! Now you have the whole store and you can get whatever you need.
 
 <br />
 
+# getItem
 ### `nodux.getItem(path: string | string[])`
+<br />
+
 Cool, so getStore is great and all, but you'll likely find it more useful to grab a specific slice of state out of your store. That's where `getItem` comes in. It takes in a path just like `setItem` and `removeItem`, and returns whatever it finds at the end of that path like this:
 ```js
 const worldsBestCat = nodux.getItem('user.pet.name');
@@ -333,7 +361,10 @@ Again, like `getStore`, `getItem` _**will not**_ provide stateful updates. For t
 
 <br />
 
+# getSize
 ### `nodux.getSize()`
+<br />
+
 getSize is a convenience method provided to check the current memory usage of your store. It simply calculates memory allocation based on the total number of characters in your JSON-stringified store and displays an alert message on the browser. To use, simply call it in your code like this:
 ```js
 // on button-click or some such thing
@@ -356,7 +387,10 @@ Using actions, you'll have reuseable state-update methods that you can call from
 
 <br />
 
+# registerActions
 ### `nodux.registerActions`
+<br />
+
 First you'll want to create a new module where your actions will live. I prefer this convention for structuring my project's file-tree:
 ```
 demoApp/
@@ -408,8 +442,9 @@ createUserActions();
 Simple as that! Now our actions will be available through nodux from anywhere in our application.
 
 <br />
+<br />
 
-## Calling Your Actions
+# Calling Your Actions
 Now that you have registered your actions with no-dux and called them at the top of your application, what should you do when you want to use them in a module? Easy, you have access to them through nodux:
 ```js
 // another module anywhere in your application
@@ -433,8 +468,9 @@ const MyModule = () => {
 ```
 
 <br />
+<br />
 
-## Scalability
+# Scalability
 As our applications grow, we may find ourselves with a ballooning number of actions-creator modules, resulting in a growing list of actions-creator calls in our top level application module:
 ```js
 // top level module
@@ -492,12 +528,190 @@ createStoreActions();
 Ahh, now doesn't that feel better?
 
 <br />
+<br />
 
 # React Hooks API
-### `useStore(path: string | string[])`
+One of the most exciting features of `no-dux` is that it gives you 100% complete control of your component rerenders. That's because all store updates happen the background unless you opt-in to listening for store updates.
+
+The `@no-dux/react` extension allows you to hook into your component state and receive background store updates as local state updates.
+
+Let's remember our store example one more time to talk about the React Hooks API:
+```js
+// store
+
+demoApp: {
+
+  auth: {
+    sessionToken: '...',
+    refreshToken: '...',
+    ...
+  },
+
+  user: {
+    name: 'dudeGuy',
+    email: 'dude@guy.com',
+    id: 'un1qu3$tr1ng',
+    randomThing: 'moreStuff',
+    pet: {
+      name: 'Bibo the cat',
+      type: 'cat',
+    },
+    ...
+  },
+
+  uiSettings: {
+    darkTheme: true,
+    ...
+  },
+
+};
+```
 
 <br />
 
-### `useAutosave`
+# useStore
+### `useStore(path?: string | string[])`
+<br />
 
-Variable interpolation into a path
+When used without a `path` argument, useStore will simply return the entire contents of your store. That looks like this:
+```js
+// component renders on every store update
+
+const store = useStore();
+```
+However, this comes with an obvious downside. When you listen to the whole store, it will update whenever *any property at any nested level* is updated.
+
+Using the `path` argument of the `useStore` hook allows you to be more specific about which store updates will trigger component updates:
+```js
+// component updates only when user updates
+
+const { user } = useStore('user');
+
+nodux.setItem('uiSettings', { darkTheme: false }); // => does not update component state
+nodux.setItem('user', { name: 'guyDude' }); // => updates component state
+nodux.setItem('user.pet', { name: 'Bibo the best cat ever' }); // => updates component state
+```
+Okay, this is better. Now the store only updates when changes are made to the `user` property of our store. Let's take it one step further see just how specific we can get!
+
+```js
+// component updates only when user.pet.type changes
+
+const { type: petType } = useStore('user.pet.type');
+
+nodux.setItem('uiSettings', { darkTheme: false }); // => does not update component state
+nodux.setItem('user', { name: 'guyDude' }); // => does not update component state
+nodux.setItem('user.pet', { name: 'Bibo the best cat ever' }); // => does not update component state
+nodux.setItem('user.pet', { type: 'alligator' }); // => only this updates component state
+```
+Great! Now we have a super specific state update that targets a leaf-node of our data-tree. You can see that I am aliasing `type` as `petType`, in case I want to be more descriptive with my naming.
+
+In this example, if the `user` property is updated, our component won't rerender because we are targeting more specific property. Even if the `user.pet.name` property is updated, we *still* expect that our component's state will not be updated. Now that's what I call controlling your rerender!
+
+<br />
+
+# Listening for multiple updates
+You may be wondering, "what if I want to listen for multiple updates, but maintain my rerender specificity?" This solution is resolved by providing an array of paths instead of a single path. That looks like this:
+```js
+const { name: userName, darkTheme } = useStore(['user.name', 'uiSettings.darkTheme']);
+```
+In this example, component state only updates when the `user.name` property or the `uiSettings.darkTheme` property changes. As you may have noticed, the returned properties are named using the _**terminal node**_ of the provided path.
+
+<br />
+
+## Common Gotchas:
+- As with all objects, key names must be unique. Therefore, when providing multiple paths, always ensure that there are no collisions between their _**terminal nodes**_.
+- When collisions occur it is recommended to simply listen for updates to a different layer of your data-tree
+
+<br />
+
+# useAutosave
+### `useAutosave(path: string | string[], whitelist: object, blacklist?: string | string[])`
+<br />
+
+This is a convenience hook provided to make background updates without manually calling `setItem` every time. This is especially useful when you remember an array of user preferences that may change regularly with user interactions. Let's look at an example:
+
+Suppose our application has a data-table that enables sorting and pagination, and as a user convenience we'd like to remember their most recent interaction with the table so that it looks the same if they navigate away and then return to the same page.
+
+<br />
+
+We'll start by adding a new `tableSettings` object to our `user` property:
+```js
+// store
+
+demoApp: {
+
+  auth: {
+    sessionToken: '...',
+    refreshToken: '...',
+    ...
+  },
+
+  user: {
+    name: 'dudeGuy',
+    email: 'dude@guy.com',
+    id: 'un1qu3$tr1ng',
+    randomThing: 'moreStuff',
+    pet: {
+      name: 'Bibo the cat',
+      type: 'cat',
+    },
+
+    // tableSettings added here
+    tableSettings: {
+      sortColumn: 'name',
+      sortDirection: 'desc',
+      page: 0,
+    },
+    ...
+  },
+
+  uiSettings: {
+    darkTheme: true,
+    ...
+  },
+
+};
+```
+
+Suppose we have a knowledge of the `sortOrder`, `sortDirection`, and `page` values somewhere else in our module, probably stored in a bit of state. Here's how we'll set up `useAutosave` to make background updates to our `tableSettings`:
+```js
+useAutosave('user.tableSettings', { sortOrder, sortDirection, page });
+```
+And we're done! `useAutosave` will listen for changes to the three specified values, and make background updates to the `user.tableSettings` slice of state any time these values change.
+- Just like with our other methods, the `path` argument can be specified using a string or an array of strings.
+- `whitelist` must be specified using an object because we need to know both the value of the variable and the key to assign it to
+
+**IMPORTANT:** The names of the keys in your whitelist *must* correspond to the store items you want to write them to. If the naming conventions in your component's local state do not correspond to the target names in your store, you'll likely want to do something like this:
+```js
+const localStateSort = // => locally defined state variable
+
+useAutosave('user.tableSettings', { sortOrder: localStateSort, sortDirection, page });
+```
+
+<br />
+
+## Using the `blacklist`
+The `blacklist` argument is a simple convenience designed to help clean up your code. It can be a string or an array of strings, and it specifies object properties that you would like to omit from the whitelist.
+
+Suppose you have a rather complex object that you would like to track in your store. But you have a problem, there are two pieces of sensitive information inside your complex object that you don't want to track. Without the blacklist, that might look like this:
+```js
+const { sensitiveThing1, sensitiveThing2, ...rest } = complexObject;
+useAutosave('blacklistExample', rest);
+```
+Okay this isn't terrible, but supposing you have a scenario need to use multiple object destructuring statements, you can see how it does not scale super well. Here's what it looks like using blacklist:
+```js
+useAutosave('blacklistExample', {...complexObject1, ...complexObject2 }, ['sensitiveThing1', 'sensitiveThing2', 'sensitiveThing3'])
+```
+
+<br />
+<br />
+<br />
+<br />
+
+To Do List:
+- spread into an array
+- back to top navigation
+- debug api navigation
+- intermediate cases
+  - avoiding data-loss
+  - Variable interpolation into a path
