@@ -1,14 +1,10 @@
 # `no-dux`
-A ridiculously lightweight and easy-to-use state management alternative to Redux
+A ridiculously lightweight and easy-to-use state management alternative
 
-<!-- - <a name='Why no-dux'>[Why no-dux](#why-no-dux)</a>
-- <a name='getting-started'>[Getting Started](#getting-started)</a>
-- <a name='api-documentation'>[API Documentation](#core-api)</a>
-- <a name='react-hooks-api'>[React Hooks API](#react-hooks-api)</a> -->
 - [Why no-dux](#why-no-dux)
 - [Getting Started](#getting-started)
 - [Core API](#core-api)
-- [Nodux Actions](#no-dux-actions)
+- [Nodux Actions](#nodux-actions)
 - [React Hooks API](#react-hooks-api)
 
 # Why `no-dux`?
@@ -19,12 +15,19 @@ Many of you have probably used Redux in the past, and if you're like me your ove
 
 ## What makes `no-dux` different?
 - It is aggressively easy to set up, learn, and use
-- It reduces your application's boilerplate and memory overhead
-- It handles data persistence over page reload (and over user sessions) without additional configuration or libraries
-- **Stateful rerender is 100% opt-in**, giving you back control of your application's performance
-- The core library is 100% framework agnostic, and its **unpacked bundle size is only _14kb_ with _zero dependencies_**!!
+- It reduces your application's boilerplate and runtime memory overhead
+- It handles data persistence over page reload without additional configuration or libraries
+- _**Stateful rerender is 100% opt-in**_, giving you back control of your application's performance
+- The core library is 100% framework agnostic, and its **unpacked bundle size is only _14kb_ with _zero dependencies_**!!!
 
-Most importantly, `no-dux` makes it easy to set and remove **deeply nested** data in your browser's localStorage. The browser's native localStorage tool generally has a use-case not too distant from it's cousin, cookies –– sure, you can store things like JSONified objects in there, but it's basically just a list of key-value pairs. With `no-dux`, you enter your store through a single root node in your localStorage, and from there you can build a data-tree structure as large and complex as your application. We take care of the nesting and the JSON parsing for you!
+<br />
+
+# How does it work ?
+Instead of overengineering complex solutions to data-persistence, `no-dux` extends the browser's native data-persistence through the `localStorage` api.
+
+Most developers probably think of `localStorage` as a glorified set of key-value pairs. It's fine for storing a few odds and ends, but it's not powerful or flexible enough to meet your application's state-management needs.
+
+`no-dux` opens up a new world of possibility by making it easy to set and remove **deeply nested** data in your browser's localStorage. With `no-dux`, you enter your store through a single root node in your localStorage, and from there you can build a data-tree structure as large and complex as your application. We take care of the nesting and the JSON parsing for you!
 
 <br />
 
@@ -33,18 +36,18 @@ If you're working on a React application, you'll likely want to download the `no
 
 ```
 npm install @no-dux/react
-
+```
 or
-
+```
 yarn add @no-dux/react
 ```
 
 If you'd rather download the core module, you can use:
 ```
 npm install @no-dux/core
-
+```
 or
-
+```
 yarn add @no-dux/core
 ```
 
@@ -57,11 +60,13 @@ Below is a basic store that we will use in our examples. It has a knowledge of s
 // store
 
 demoApp: {
+
   auth: {
     sessionToken: '...',
     refreshToken: '...',
     ...
   },
+
   user: {
     name: 'dudeGuy',
     email: 'dude@guy.com',
@@ -69,16 +74,15 @@ demoApp: {
     randomThing: 'moreStuff',
     ...
   },
+
   uiSettings: {
     darkTheme: true,
     ...
   },
+
 };
 ```
 
-<br />
-
-## Data Setters
 ### `nodux.createStore({ root?: string })`
 The first thing we'll need to do is instantiate our store somewhere near the top level of our application. That looks like this:
 ```js
@@ -91,31 +95,35 @@ nodux.createStore({ root: 'demoApp' });
 
 <br />
 
+## Data Setters
 ### `nodux.setItem(path: string | string[], item: string | object)`
-Now, suppose our user has a pet that we would like to remember. We would get that information from the user and set it in our store like this:
+Suppose our user has a pet that we would like to remember. We would get that information from the user and set it in our store like this:
 ```js
 import { nodux } from '@no-dux/core';
 
 nodux.setItem('user.pet', { type: 'cat', name: 'Bibo the cat' });
 ```
-The `path` argument tells `no-dux` how to key into the data tree to find the item we'd like to update. We can also use an array to define the path. That looks like this:
-```
+The `path` argument tells `no-dux` how to key into the data tree to find the item we'd like to update.
+
+If a node in the path does not exist in the current data-tree, it will be automatically set to an empty object. We don't need to set `pet` as a property of `user` before we start writing values into it, we can simply write values into `user.pet` and `no-dux` handles the rest!
+
+We can also use an array to define the path. That looks like this:
+```js
 nodux.setItem(['user', 'pet'], { type: 'cat', name: 'Bibo the cat' });
 ```
-- **Note**: if a node in the path does not exist in the current data-tree, it will be automatically set to an empty object. We don't need to set `pet` as a property of `user` before we start writing values into it, we can simply write values into `user.pet` and `no-dux` handles the rest!
-
-<br />
 
 The expected result of these operations on our store looks like this:
 ```js
 // store
 
 demoApp: {
+
   auth: {
     sessionToken: '...',
     refreshToken: '...',
     ...
   },
+
   user: {
     name: 'dudeGuy',
     email: 'dude@guy.com',
@@ -123,7 +131,7 @@ demoApp: {
     randomThing: 'moreStuff',
 
 
-    // pet data has been updated
+    // pet data updated
     pet: {
       name: 'Bibo the cat',
       type: 'cat',
@@ -131,10 +139,12 @@ demoApp: {
 
     ...
   },
+
   uiSettings: {
     darkTheme: true,
     ...
   },
+
 };
 ```
 
@@ -153,9 +163,11 @@ The result should look like this:
 // store
 
 demoApp: {
+
   auth: {
     ...
   },
+
   user: {
     name: 'dudeGuy',
     email: 'dude@guy.com',
@@ -167,10 +179,12 @@ demoApp: {
     },
     ...
   },
+
   uiSettings: {
     darkTheme: true,
     ...
   },
+
 };
 ```
 
@@ -186,6 +200,7 @@ and the expected result of this operation looks like this:
 // store
 
 demoApp: {
+
   user: {
     name: 'dudeGuy',
     email: 'dude@guy.com',
@@ -197,10 +212,12 @@ demoApp: {
     },
     ...
   },
+
   uiSettings: {
     darkTheme: true,
     ...
   },
+
 };
 ```
 See? The `auth` object has been completely removed from the store. Anytime no `blacklist` argument is provided to `removeItem`, nodux will completely remove the last node in the path. Otherwise, it will remove the items specified in the `blacklist`. Okay, let's look at one more example of how to use `removeItem`:
@@ -216,6 +233,7 @@ Super! Now that we've removed our user's session data and that random thing, our
 // store
 
 demoApp: {
+
   user: {
     name: 'dudeGuy',
     email: 'dude@guy.com',
@@ -226,10 +244,12 @@ demoApp: {
     },
     ...
   },
+
   uiSettings: {
     darkTheme: true,
     ...
   },
+
 };
 ```
 
@@ -253,11 +273,13 @@ So we've learned how to set and remove data from our store, but what if we just 
 // store
 
 demoApp: {
+
   auth: {
     sessionToken: '...',
     refreshToken: '...',
     ...
   },
+
   user: {
     name: 'dudeGuy',
     email: 'dude@guy.com',
@@ -269,10 +291,12 @@ demoApp: {
     },
     ...
   },
+
   uiSettings: {
     darkTheme: true,
     ...
   },
+
 };
 ```
 ### `nodux.getStore()`
@@ -293,7 +317,7 @@ const worldsBestCat = nodux.getItem('user.pet.name');
 
 console.log(worldsBestCat);  // => 'Bibo the cat'
 ```
-Again, getItem _**will not**_ provide stateful updates. For that you'll need to use [hooks](#react-hooks-api).
+Again, like `getStore`, `getItem` _**will not**_ provide stateful updates. For that you'll need to use [hooks](#react-hooks-api).
 
 <br />
 
@@ -310,11 +334,13 @@ nodux.getSize()
 # Nodux Actions
 Super! We're finally ready to talk about `actions`!
 
-At this point, many of you may be thinking, "it's true, Redux boilerplate is a pain, but one thing I do like is the way the dispatch => action => reducer pattern normalizes my actions into reuseable state update functions. Does no-dux provide a solution for action normalization?"
+At this point, many of you may be thinking, "it's true, Redux boilerplate is a pain, but one thing I do like is the way the dispatch => action => reducer pattern normalizes my actions into reuseable state update methods. I can dispatch the same action from anywhere in my application and get a reliable result. Does no-dux provide a similar solution for action normalization?"
+
+<br />
 
 The answer to this question is no-dux actions!
 
-Using actions, you'll have reuseable state-manipulation methods that you can use from anywhere in your application and always get the same result, keeping your code DRY and maintainable.
+Using actions, you'll have reuseable state-update methods that you can use from anywhere in your application, keeping your code DRY and maintainable.
 
 <br />
 
@@ -331,6 +357,8 @@ demoApp/
 ```
 Now that you've set up your file-tree and created a new module for your actions, you're ready to start defining some normalized actions:
 ```js
+// userActions.js
+
 import { nodux } from '@no-dux/core';
 
 const logout = () => nodux.removeItem('auth');
@@ -347,7 +375,7 @@ export const createUserActions = () => {
   });
 }
 ```
-There's nothing to stop you from doing other things in the body of your actions too. Perhaps you'd like to build an action that looks more like this:
+There's no reason you can't do other things in the body of your action too. Perhaps you'd like to build an action that looks more like this:
 ```js
 const setUserData = (payload) => {
   const backendData = // do some backend call thing
@@ -357,6 +385,8 @@ const setUserData = (payload) => {
 ```
 Awesome! The last step to ensure that you have access to your actions throughout your application is to take your brand new `createUserActions` function, and call it somewhere near the top level of your application. Right next to `createStore` ought to be a good spot:
 ```js
+// top level module
+
 import { nodux } from '@no-dux/core';
 import { createUserActions } from './src/store/actions/userActions';
 
@@ -370,6 +400,8 @@ Simple as that! Now our actions will be available through nodux from anywhere in
 ## Calling Your Actions
 Now that you have registered your actions with no-dux and called them at the top of your application, what should you do when you want to use them in a module? Easy, you have access to them through nodux:
 ```js
+// another module anywhere in your application
+
 import { nodux } from '@no-dux/core';
 
 const MyModule = () => {
@@ -393,6 +425,8 @@ const MyModule = () => {
 ## Scalability
 As our applications grow, we may find ourselves with a ballooning number of actions-creator modules, resulting in a growing list of actions-creator calls in our top level application module:
 ```js
+// top level module
+
 import ...
 
 nodux.createStore({ root: 'demoApp' });
@@ -420,6 +454,8 @@ demoApp/
 
 It might look something like this:
 ```js
+// src/store/actions/index.js
+
 import ... all actions-creators here
 
 export const createStoreActions = () => {
@@ -433,6 +469,8 @@ export const createStoreActions = () => {
 ```
 And then your app module will be nice and cleaned up:
 ```js
+// top level module
+
 import { nodux } from '@no-dux/core';
 import { createStoreActions } from './src/store/actions/index';
 
