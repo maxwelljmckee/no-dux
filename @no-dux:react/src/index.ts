@@ -1,5 +1,5 @@
-import React from "react";
-import { nodux } from "@no-dux/core";
+import React from 'react'
+import { nodux as store } from "@no-dux/core";
 
 export const useStore = (path) => {
   const [watchlist, setWatchlist] = React.useState({});
@@ -12,12 +12,12 @@ export const useStore = (path) => {
 
   React.useEffect(() => {
     const initializeWatchlist = () => {
-      if (!path) return setWatchlist(nodux.getStore());
+      if (!path) return setWatchlist(store.getStore());
       setWatchlist(
         pathList.reduce((acc, key) => {
           return {
             ...acc,
-            [key]: nodux.getItem(key),
+            [key]: store.getItem(key),
           };
         }, {})
       );
@@ -29,11 +29,11 @@ export const useStore = (path) => {
 
   React.useEffect(() => {
     const onStoreUpdate = (event) => {
-      if (!path) return setWatchlist(nodux.getStore());
+      if (!path || event.detail === 'clear') return setWatchlist(store.getStore());
       const modified = event.detail;
       Object.keys(watchlist).forEach((key) => {
         if (modified.startsWith(key)) {
-          setWatchlist({ ...watchlist, [key]: nodux.getItem(key) });
+          setWatchlist({ ...watchlist, [key]: store.getItem(key) });
         }
       });
     };
@@ -53,3 +53,5 @@ export const useStore = (path) => {
         return { ...acc, [trimmed]: watchlist[key] };
       }, {});
 };
+
+export const nodux = store
