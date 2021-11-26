@@ -4,7 +4,7 @@ A ridiculously lightweight and easy-to-use state management alternative
 - [Why no-dux](#why-no-dux)
 - [Getting Started](#getting-started)
 - [Core API](#core-api)
-  - [nodux.createStore](#`nodux-createStore)
+  - [nodux.createStore](#`nodux-createStore`)
 - [Nodux Actions](#nodux-actions)
   - [Calling Your Actions](#calling-your-actions)
   - [Scalability](#scalability)
