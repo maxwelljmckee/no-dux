@@ -63,7 +63,7 @@ yarn add @no-dux/react
 
 <br />
 
-If you'd rather download the core module, you can use:
+If you'd prefer to download the core module, you can use:
 ```
 npm install @no-dux/core
 ```
@@ -80,12 +80,16 @@ yarn add @no-dux/core
 <br />
 
 # Core API
-## Setup
-Below is a basic store that we will use in our examples. It has a knowledge of some auth data, some user data, and some of the user's UI settings:
-```js
-// store
+## createStore
+### `nodux.createStore({ root?: string, defaultStore?: object })`
+<br />
 
-demoApp: {
+The first thing we'll need to do is instantiate our store somewhere near the top level of our application. If you're working on a React app, you'll likely prefer to use your `App` component. We'll also specify some default values so we have some data to work with in upcoming examples. That looks like this:
+```js
+import { nodux } from '@no-dux/core';
+// or @no-dux/react if using the extension
+
+const storeDefaults = {
 
   auth: {
     sessionToken: '...',
@@ -107,22 +111,13 @@ demoApp: {
   },
 
 };
+
+nodux.createStore({ root: 'demoApp', defaults: storeDefaults });
 ```
-
-<br />
-
-# createStore
-### `nodux.createStore({ root?: string })`
-<br />
-
-The first thing we'll need to do is instantiate our store somewhere near the top level of our application. That looks like this:
-```js
-import { nodux } from '@no-dux/core';
-// or @no-dux/react if using the extension
-
-nodux.createStore({ root: 'demoApp' });
-```
+Notice that our example store has a knowledge of some auth data, some user data, and some ui settings.
+## Arguments
 - The value of `root` will be used as the name for the root node of store's data-tree. If no value is provided, the name will default to "root"
+- If desired, default values can be set to the store using the `defaultStore` argument. If no defaults are specified, the store will simply be initialized as an empty object at the root node
 
 <br />
 
@@ -131,11 +126,11 @@ nodux.createStore({ root: 'demoApp' });
 <br />
 
 # Data Setters
-# setItem
+## setItem
 ### `nodux.setItem(path: string | string[], item: string | object)`
 <br />
 
-Suppose our user has a pet that we would like to remember. We would get that information from the user and set it in our store like this:
+Suppose our user has a pet whose information we would like to remember. We would get that information from the user and set it in our store like this:
 ```js
 import { nodux } from '@no-dux/core';
 
@@ -193,7 +188,7 @@ demoApp: {
 <br />
 
 
-# removeItem
+## removeItem
 ### `nodux.removeItem(path: string | string[], blacklist?: string | string[])`
 <br />
 
@@ -306,7 +301,7 @@ demoApp: {
 <br />
 
 
-# clear
+## clear
 ### `nodux.clear()`
 <br />
 
@@ -363,7 +358,7 @@ demoApp: {
 
 <br />
 
-# getStore
+## getStore
 ### `nodux.getStore()`
 <br />
 
@@ -382,7 +377,7 @@ Easy! Now you have the whole store and you can get whatever you need.
 <br />
 
 
-# getItem
+## getItem
 ### `nodux.getItem(path: string | string[])`
 <br />
 
@@ -401,7 +396,7 @@ Again, like `getStore`, `getItem` _**will not**_ provide stateful updates. For t
 <br />
 
 
-# getSize
+## getSize
 ### `nodux.getSize()`
 <br />
 
@@ -432,7 +427,7 @@ Using actions, you'll have reuseable state-update methods that you can call from
 
 <br />
 
-# registerActions
+## registerActions
 ### `nodux.registerActions`
 <br />
 
@@ -493,7 +488,7 @@ Simple as that! Now our actions will be available through nodux from anywhere in
 <br />
 
 
-# Calling Your Actions
+## Calling Your Actions
 Now that you have registered your actions with no-dux and called them at the top of your application, what should you do when you want to use them in a module? Easy, you have access to them through nodux:
 ```js
 // another module anywhere in your application
@@ -523,7 +518,7 @@ const MyModule = () => {
 <br />
 
 
-# Scalability
+## Scalability
 As our applications grow, we may find ourselves with a ballooning number of actions-creator modules, resulting in a growing list of actions-creator calls in our top level application module:
 ```js
 // top level module
@@ -626,7 +621,7 @@ demoApp: {
 
 <br />
 
-# useStore
+## useStore
 ### `useStore(path?: string | string[])`
 <br />
 
@@ -671,7 +666,7 @@ In this example, if the `user` property is updated, our component won't rerender
 
 <br />
 
-# Listening for multiple updates
+## Listening for multiple updates
 You may be wondering, "what if I want to listen for multiple updates, but maintain my rerender specificity?" This solution is resolved by providing an array of paths instead of a single path. That looks like this:
 ```js
 const { name: userName, darkTheme } = useStore(['user.name', 'uiSettings.darkTheme']);
@@ -691,7 +686,7 @@ In this example, component state only updates when the `user.name` property or t
 <br />
 
 
-# useAutosave
+## useAutosave
 ### `useAutosave(path: string | string[], whitelist: object, blacklist?: string | string[])`
 <br />
 
