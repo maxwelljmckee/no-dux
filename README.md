@@ -1,5 +1,5 @@
 # `no-dux`
-A ridiculously lightweight and easy-to-use state management alternative
+A ridiculously lightweight and easy-to-use state management alternative to Redux
 
 - [Why no-dux](#why-no-dux)
 - [Getting Started](#getting-started)
