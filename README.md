@@ -590,7 +590,7 @@ Ahh, now doesn't that feel better?
 # React Hooks API
 One of the most exciting features of `no-dux` is that it gives you 100% complete control of your component rerenders. That's because all store updates happen the background unless you opt-in to listening for store updates.
 
-The `@no-dux/react` extension allows you to hook into your component state and receive background store updates as local state updates.
+That's where the React hooks api comes in. The `@no-dux/react` extension allows you to hook into your component state and receive background store updates as local state updates.
 
 Let's remember our store example one more time to talk about the React Hooks API:
 ```js
