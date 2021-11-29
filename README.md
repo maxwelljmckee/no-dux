@@ -324,7 +324,11 @@ demoApp: {}
 
 
 # Data Getters
-So we've learned how to set and remove data from our store, but what if we just want to take a peek inside and see what's there? That's where **getters** come in! Let's go back to an earlier version of our store example to learn about getters:
+So we've learned how to set and remove data from our store, but what if we just want to take a peek inside and see what's there? That's where **getters** come in!
+
+**IMPORTANT**: With `no-dux`, stateful update is 100% opt-in. That means that data-getters can provide us a snapshot of the store when component renders, but component rerender will not be triggered by store updates. For stateful component rerender, please see the [React Hooks section](#react-hooks-api) of the docs.
+
+Let's go back to an earlier version of our store example to learn about getters:
 ```js
 // store
 
