@@ -324,7 +324,7 @@ demoApp: {}
 
 
 # Data Getters
-**IMPORTANT**: With `no-dux`, stateful update is 100% opt-in. That means that data-getters can provide us a snapshot of the store when component renders, but component rerender will not be triggered by store updates. For stateful component rerender, please see the [React Hooks section](#react-hooks-api) of the docs.
+**IMPORTANT**: With `no-dux`, stateful update is 100% opt-in. That means that data-getters can provide a _**snapshot**_ of the store when a component renders, but _**component rerender will not be triggered by store updates**_. For stateful component rerender, please see the [React Hooks API](#react-hooks-api) section of the docs.
 
 We've learned how to set and remove data from our store, but what if we just want to take a peek inside and see what's there? That's where **getters** come in!
 
@@ -372,8 +372,6 @@ const store = nodux.getStore();
 ```
 Easy! Now you have the whole store and you can get whatever you need.
 
-**IMPORTANT**: this method provides a snapshot of the store on page-load, but it will not receive stateful updates of the store as changes are made. To hook into stateful updates, you'll need to use the React extension, documented [here](#react-hooks-api).
-
 <br />
 
 [back to top](#no-dux)
@@ -391,7 +389,6 @@ const worldsBestCat = nodux.getItem('user.pet.name');
 
 console.log(worldsBestCat);  // => 'Bibo the cat'
 ```
-Again, like `getStore`, `getItem` _**will not**_ provide stateful updates. For that you'll need to use [hooks](#react-hooks-api).
 
 <br />
 
@@ -406,10 +403,9 @@ Again, like `getStore`, `getItem` _**will not**_ provide stateful updates. For t
 
 getSize is a convenience method provided to check the current memory usage of your store. It simply calculates memory allocation based on the total number of characters in your JSON-stringified store and displays an alert message on the browser. To use, simply call it in your code like this:
 ```js
-// on button-click or some such thing
-
-nodux.getSize()
+<TestSizeButton onClick={nodux.getSize} />
 ```
+You can test your store's size however you want. The example above is a `TestSizeButton` React component that would reveal the alert message when clicked. Obviously this is intended for testing purposes only and should be removed from your production application.
 
 <br />
 
