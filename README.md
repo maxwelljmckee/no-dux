@@ -23,7 +23,9 @@ A ridiculously lightweight and easy-to-use state management alternative to Redux
 
 # Why `no-dux`?
 ## You're looking for a new state management solution
-Many of you have probably used Redux in the past, and if you're like me your overall reaction was probably mostly positive. What a great tool, you thought, but why does it have so much boilerplate? And why does my data disappear on a page reload? Sure I can chuck it in localStorage to persist, but then I'm clogging up memory with unnecessary duplication. And what the heck is a reducer anyway? And what if I don't want a rerender every time a change is made to global state?
+Many of you have probably used Redux in the past, and if you're like me your overall reaction was probably mostly positive. What a great tool, you thought, but why does it have so much boilerplate? And why does my data disappear on a page reload? Sure I can chuck it in localStorage to persist, but then I'm clogging up memory with unnecessary duplication. And what the heck is a reducer anyway?
+
+Many developers avoid Redux in favor of the React Context API, which captures nearly all the same use cases. But both of these tools can have performance issues relating to unintended rerenders, and these performance pitfalls can be harder and harder to maintain as both your team and your application scale up.
 
 <br />
 
