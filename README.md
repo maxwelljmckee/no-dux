@@ -3,6 +3,7 @@ A ridiculously lightweight and easy-to-use state management alternative to Redux
 
 - [Why no-dux](#why-no-dux)
 - [Getting Started](#getting-started)
+- [TLDR](#tldr)
 - [Core API](#core-api)
   - [createStore](#createstore)
   - [Data Setters](#data-setters)
@@ -76,6 +77,63 @@ yarn add @no-dux/core
 
 <br />
 
+[back to top](#no-dux)
+
+<br />
+
+# TLDR
+Okay, here's the short version:
+- use `createStore` to instantiate your store somewhere near the top level of your application
+- use `setItem` to update your store
+- use `removeItem` to take values out of your store
+- keep your code DRY and maintainable by encapsulating your store updates inside reuseable `actions`
+```js
+// top level module
+
+import { nodux } from '@no-dux/core';
+
+nodux.createStore({ root: 'demoApp' });
+
+// optionally instantiate some actions along with your store
+createUserActions()
+
+const App = () => {...}
+```
+<br/>
+
+```js
+// actions creator module
+
+const loginUser = (authToken) => nodux.setItem('auth', { authToken });
+
+const logoutUser = () => nodux.removeItem('auth');
+
+const updateUsername = (newName) => nodux.setItem('user', { name: newName });
+
+const updateUiTheme = (darkTheme) = nodux.setItem('uiSettings', { darkTheme });
+
+export const createUseActions = () = ({
+  loginUser,
+  logoutUser,
+  updateUsername,
+  updateUiTheme,
+});
+```
+<br/>
+
+```js
+// anywhere within your application
+
+nodux.setItem('user', { name: 'demoUser' });
+
+// or
+
+const { actions } = nodux;
+actions.loginUser(userData);
+```
+
+
+<br />
 
 [back to top](#no-dux)
 
@@ -116,6 +174,9 @@ const storeDefaults = {
 
 nodux.createStore({ root: 'demoApp', defaults: storeDefaults });
 ```
+
+<br />
+
 Notice that our example store has a knowledge of some auth data, some user data, and some ui settings.
 ## Arguments
 - The value of `root` will be used as the name for the root node of store's data-tree. If no value is provided, the name will default to "root"
@@ -138,14 +199,18 @@ import { nodux } from '@no-dux/core';
 
 nodux.setItem('user.pet', { type: 'cat', name: 'Bibo the cat' });
 ```
-The `path` argument tells `no-dux` how to key into the data tree to find the item we'd like to update.
+The `path` argument tells `no-dux` how to key into the store's data-tree to find the item we'd like to update.
 
 If a node in the path does not exist in the current data-tree, it will be automatically set to an empty object. We don't need to set `pet` as a property of `user` before we start writing values into it, we can simply write values into `user.pet` and `no-dux` handles the rest!
+
+<br />
 
 We can also use an array to define the path. That looks like this:
 ```js
 nodux.setItem(['user', 'pet'], { type: 'cat', name: 'Bibo the cat' });
 ```
+
+<br />
 
 The expected result of these operations on our store looks like this:
 ```js
@@ -192,16 +257,19 @@ demoApp: {
 
 ## removeItem
 ### `nodux.removeItem(path: string | string[], blacklist?: string | string[])`
+
 <br />
 
-Now, suppose our user decides they want to logout or end their current session. We'll probably want to remove any relevant auth information from the store.
+Now, suppose our user decides they want to logout of their current session. We'll probably want to remove any relevant auth information from the store.
+
 To remove an item from our store, we need to provide a path to the item so `no-dux` knows where to look for it. The `blacklist` argument can be a string, an array of strings, or nothing! Let's explore the possibilities:
 ```js
 nodux.removeItem('auth', ['sessionToken', 'refreshToken']);
 ```
-The above option will remove only the `sessionToken` and `refreshToken` properties of the auth object, leaving the rest intact.
 
-The result should look like this:
+<br />
+
+The above option will remove only the `sessionToken` and `refreshToken` properties of the auth object, leaving the rest intact. The result should look like this:
 ```js
 // store
 
@@ -231,10 +299,11 @@ demoApp: {
 };
 ```
 
+<br />
 
 But suppose we'd like to remove the auth object entirely. We're just going to reset it when the user logs back in anyway, right?
 
-To remove an item completely, we can simply provide *no argument* for `blacklist`. That looks like this:
+To remove an item completely, we can simply provide _**no argument**_ for `blacklist`. That looks like this:
 ```js
 nodux.removeItem('auth');
 ```
@@ -263,6 +332,9 @@ demoApp: {
 
 };
 ```
+
+<br />
+
 See? The `auth` object has been completely removed from the store. Anytime no `blacklist` argument is provided to `removeItem`, nodux will completely remove the last node in the path. Otherwise, it will remove the items specified in the `blacklist`. Okay, let's look at one more example of how to use `removeItem`:
 
 Suppose we want to remove the `randomThing` property from our `user` object. Hey what's that random thing doing in there anyway??
