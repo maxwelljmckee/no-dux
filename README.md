@@ -39,7 +39,7 @@ In recent years, many developers have abandoned Redux in favor of the React Cont
 <br />
 
 ## How does it work?
-Instead of overengineering complex solutions to data-persistence, `no-dux` works by extending the browser's native data-persistence through the `localStorage` api.
+Instead of overengineering complex solutions to data-persistence, `no-dux` works by extending the browser's native data-persistence tools through the `localStorage` api.
 
 Most developers probably think of `localStorage` as a glorified set of key-value pairs. It's fine for storing a few odds and ends, but it's not powerful or flexible enough to meet your application's state-management needs.
 
