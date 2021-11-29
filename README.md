@@ -23,9 +23,9 @@ A ridiculously lightweight and easy-to-use state management alternative to Redux
 
 # Why `no-dux`?
 ## You're looking for a new state management solution
-Many of you have probably used Redux in the past, and if you're like me your initial reaction was probably mostly positive. What a great tool, you thought, but why does it have so much boilerplate? And why does my data disappear on a page reload? Sure I can chuck it in localStorage to persist, but then I'm clogging up memory with unnecessary duplication. And what the heck is a reducer anyway?
+Many of you have probably used Redux in the past, and if you're like me your initial reaction was probably mostly positive. What a great tool, you thought, but as time went on you started asking questions like why does it have so much boilerplate? And why does my data disappear on a page reload? Sure I can chuck it in localStorage to persist, but then I'm clogging up memory with unnecessary duplication. And what the heck is a reducer anyway?
 
-In recent years, many developers have abandoned Redux in favor of the React Context API, which captures nearly all the same use cases with less configuration. But both of these tools can have performance issues relating to unintended rerenders cascading through your Virtual-DOM, and these pitfalls can be harder and harder to maintain as both your team and your application grow in size and complexity.
+In recent years, many developers have abandoned Redux in favor of the React Context API, which captures nearly all the same use cases with less configuration. But both of these tools can face performance issues when unintended rerenders go cascading through your Virtual-DOM. And these pitfalls can be harder and harder to maintain as both your application and your organization scale in size and complexity.
 
 <br />
 
@@ -33,13 +33,13 @@ In recent years, many developers have abandoned Redux in favor of the React Cont
 - It is aggressively easy to set up, learn, and use
 - It reduces your application's boilerplate and runtime memory overhead
 - It handles data persistence over page reload without additional configuration or libraries
-- _**Stateful rerender is 100% opt-in**_, giving you back control of your application's performance
+- _**Stateful rerender is 100% opt-in**_, putting you back in charge of your application's performance
 - The core library is 100% framework agnostic, and its **unpacked bundle size is only _14kb_ with _zero dependencies_**!!!
 
 <br />
 
 ## How does it work?
-Instead of overengineering complex solutions to data-persistence, `no-dux` works by extending the browser's native data-persistence tools through the `localStorage` api.
+Instead of overengineering another complex data-persistence solution, `no-dux` works by extending the browser's native data-persistence tools using the `localStorage` api.
 
 Most developers probably think of `localStorage` as a glorified set of key-value pairs. It's fine for storing a few odds and ends, but it's not powerful or flexible enough to meet your application's state-management needs.
 
@@ -53,7 +53,7 @@ Most developers probably think of `localStorage` as a glorified set of key-value
 
 
 # Getting Started
-If you're working on a React application, you'll likely want to download the `no-dux` extension that comes with some handy state-management hooks:
+If you're working on a React application, you'll likely want to download the `no-dux` extension that comes with some handy stateful-update hooks:
 
 ```
 npm install @no-dux/react
@@ -65,7 +65,7 @@ yarn add @no-dux/react
 
 <br />
 
-If you'd prefer to download the core module, you can use:
+Otherwise you can download the core module using:
 ```
 npm install @no-dux/core
 ```
