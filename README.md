@@ -83,10 +83,10 @@ yarn add @no-dux/core
 
 # TLDR
 Okay, here's the short version:
-- use `createStore` to instantiate your store somewhere near the top level of your application
-- use `setItem` to update your store
-- use `removeItem` to take values out of your store
-- keep your code DRY and maintainable by encapsulating your store updates inside reuseable `actions`
+- use `nodux.createStore` to instantiate your store somewhere near the top level of your application
+- use `nodux.setItem` to update your store
+- use `nodux.removeItem` to take values out of your store
+- keep your code DRY and maintainable by encapsulating your store updates in reuseable `actions` with `nodux.registerActions`
 ```js
 // top level module
 
