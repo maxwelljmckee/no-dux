@@ -110,14 +110,16 @@ const logoutUser = () => nodux.removeItem('auth');
 
 const updateUsername = (newName) => nodux.setItem('user', { name: newName });
 
-const updateUiTheme = (darkTheme) = nodux.setItem('uiSettings', { darkTheme });
+const updateUiTheme = (darkTheme) => nodux.setItem('uiSettings', { darkTheme });
 
-export const createUseActions = () = ({
-  loginUser,
-  logoutUser,
-  updateUsername,
-  updateUiTheme,
-});
+export const createUseActions = () = {
+  nodux.registerActions({
+    loginUser,
+    logoutUser,
+    updateUsername,
+    updateUiTheme,
+  });
+};
 ```
 <br/>
 
