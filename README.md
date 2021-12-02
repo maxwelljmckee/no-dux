@@ -2,8 +2,8 @@
 A ridiculously lightweight and easy-to-use state management alternative to Redux
 
 - [Why no-dux](#why-no-dux)
-- [Getting Started](#getting-started)
 - [TLDR](#tldr)
+- [Getting Started](#getting-started)
 - [Core API](#core-api)
   - [createStore](#createstore)
   - [Data Setters](#data-setters)
@@ -24,9 +24,9 @@ A ridiculously lightweight and easy-to-use state management alternative to Redux
 
 # Why `no-dux`?
 ## You're looking for a new state management solution
-Many of you have probably used Redux in the past, and if you're like me your initial reaction was mostly positive. What a great tool, you thought, but as time went on you started asking questions like, but why does it have so much boilerplate? And why does my data disappear on a page reload? Sure I can chuck it in localStorage to persist, but then I'm clogging up memory with unnecessary duplication. And what the heck is a reducer anyway?
+Many of you have probably used Redux in the past, and for most developers the initial reaction was mainly positive. What a great tool, you thought, but as time went on you started asking questions like, but why does it have so much boilerplate? And why does my data disappear on a page reload? Sure I can chuck it in localStorage to persist, but then I'm clogging up memory with unnecessary duplication. And what the heck is a reducer anyway?
 
-In recent years, many developers have abandoned Redux in favor of the React Context API, which captures nearly all the same use cases with less configuration. But both of these tools can face performance issues when unintended rerenders go cascading through your Virtual-DOM. And these pitfalls can be harder and harder to maintain as both your application and your organization scale in size and complexity.
+In recent years, many developers have abandoned Redux in favor of the React Context API, which captures nearly all the same use cases with less configuration. But both of these tools can face performance issues when unintended rerenders go cascading through your Virtual-DOM. And these performance pitfalls can be harder and harder to maintain as both your application and your organization scale in size and complexity.
 
 <br />
 
@@ -35,16 +35,16 @@ In recent years, many developers have abandoned Redux in favor of the React Cont
 - It reduces your application's boilerplate and runtime memory overhead
 - It handles data persistence over page reload without additional configuration or libraries
 - _**Stateful rerender is 100% opt-in**_, putting you back in charge of your application's performance
-- The core library is 100% framework agnostic, and its **unpacked bundle size is only _14kb_ with _zero dependencies_**!!!
+- The core library is 100% framework agnostic, and its **unpacked bundle size is only _14kb_ with _zero dependencies!!_**
 
 <br />
 
 ## How does it work?
-Instead of overengineering another complex data-persistence solution, `no-dux` works by extending the browser's native data-persistence tools using the `localStorage` api.
+Instead of overengineering another complex data-persistence solution, `no-dux` works by extending the browser's native data-persistence tools through the `localStorage` api.
 
 Most developers probably think of `localStorage` as a glorified set of key-value pairs. It's fine for storing a few odds and ends, but it's not powerful or flexible enough to meet your application's state-management needs.
 
-`no-dux` opens up a new world of possibility by making it easy to set and remove **deeply nested** data in your browser's localStorage. With `no-dux`, you enter your store through a single root node in your localStorage, and from there you can build a data-tree structure as large and complex as your application. We take care of the nesting and the JSON parsing for you!
+`no-dux` opens up a new world of possibility by making it easy to set and remove _**deeply nested**_ data in your browser's localStorage. With `no-dux`, you enter your store through a single root node in your localStorage, and from there you can build a data-tree as large and complex as your application. We take care of the nesting and the JSON parsing for you!
 
 <br />
 
@@ -52,6 +52,87 @@ Most developers probably think of `localStorage` as a glorified set of key-value
 
 <br />
 
+# TLDR
+Okay, here's the short version:
+- use `nodux.createStore` to instantiate your store somewhere near the top level of your application
+- use `nodux.setItem` to update your store
+- use `nodux.removeItem` to delete values from your store
+- use `nodux.getItem` to reference values in your store
+- keep your code DRY and maintainable by encapsulating your store update methods in reuseable `actions` with `nodux.registerActions`
+```js
+// top level module
+
+import { nodux } from '@no-dux/core';
+  // or '@no-dux/react' when using the react extension
+
+nodux.createStore({ root: 'demoApp' });
+  // => demoApp = {}
+
+createUserActions();
+  // optionally instantiate some actions along with your store
+
+const App = () => {...};
+```
+<br/>
+
+```js
+// actions creator module
+
+// this pattern functionally replaces the entire constants => actions => reducer boilerplate of Redux
+
+import { nodux } from '@no-dux/core';
+
+const loginUser = (token) => nodux.setItem('auth', { authToken: token });
+
+const logoutUser = () => nodux.removeItem('auth');
+
+const updateUsername = (newName) => nodux.setItem('user', { name: newName });
+
+const updateUiTheme = (darkTheme) => nodux.setItem('uiSettings', { darkTheme });
+
+export const createUseActions = () = {
+  nodux.registerActions({
+    loginUser,
+    logoutUser,
+    updateUsername,
+    updateUiTheme,
+  });
+};
+```
+<br/>
+
+```js
+// anywhere within your application
+
+import { nodux } from '@no-dux/core';
+
+nodux.setItem('user', { name: 'demoUser', favoriteAnimal: 'Bibo the cat' });
+  // => demoStore = { user: { name: 'demoUser', favoriteAnimal: 'Bibo the cat' } }
+
+nodux.getItem('user.favoriteAnimal');
+  // => 'Bibo the cat'
+
+nodux.removeItem('user', ['favoriteAnimal']);
+  // => demoStore = { user: { name: 'demoUser' } }
+
+
+// alternatively using normalized actions
+
+const { actions } = nodux;
+
+actions.loginUser(token);
+  // => demoStore = { auth: { authToken: token } }
+
+actions.updateUiTheme({ darkTheme: true });
+  // => demoStore = { auth: { authToken: token }, uiSettings: { darkTheme: true } }
+```
+
+
+<br />
+
+[back to top](#no-dux)
+
+<br />
 
 # Getting Started
 If you're working on a React application, you'll likely want to download the `no-dux` extension that comes with some handy stateful-update hooks:
@@ -74,66 +155,6 @@ or
 ```
 yarn add @no-dux/core
 ```
-
-<br />
-
-[back to top](#no-dux)
-
-<br />
-
-# TLDR
-Okay, here's the short version:
-- use `nodux.createStore` to instantiate your store somewhere near the top level of your application
-- use `nodux.setItem` to update your store
-- use `nodux.removeItem` to take values out of your store
-- keep your code DRY and maintainable by encapsulating your store updates in reuseable `actions` with `nodux.registerActions`
-```js
-// top level module
-
-import { nodux } from '@no-dux/core';
-
-nodux.createStore({ root: 'demoApp' });
-
-// optionally instantiate some actions along with your store
-createUserActions()
-
-const App = () => {...}
-```
-<br/>
-
-```js
-// actions creator module
-
-const loginUser = (authToken) => nodux.setItem('auth', { authToken });
-
-const logoutUser = () => nodux.removeItem('auth');
-
-const updateUsername = (newName) => nodux.setItem('user', { name: newName });
-
-const updateUiTheme = (darkTheme) => nodux.setItem('uiSettings', { darkTheme });
-
-export const createUseActions = () = {
-  nodux.registerActions({
-    loginUser,
-    logoutUser,
-    updateUsername,
-    updateUiTheme,
-  });
-};
-```
-<br/>
-
-```js
-// anywhere within your application
-
-nodux.setItem('user', { name: 'demoUser' });
-
-// or
-
-const { actions } = nodux;
-actions.loginUser(userData);
-```
-
 
 <br />
 
@@ -768,9 +789,9 @@ In this example, component state only updates when the `user.name` property or t
 
 This is a convenience hook provided to make background updates without manually calling `setItem` every time. This is especially useful when you remember an array of user preferences that may change regularly with user interactions. Let's look at an example:
 
-Suppose our application has a data-table that enables sorting and pagination, and as a user convenience we'd like to remember their most recent interaction with the table so that it looks the same if they navigate away and then return to the same page.
-
 <br />
+
+Suppose our application has a data-table that enables sorting and pagination, and as a convenience we'd like to remember our user's most recent interaction with the table so that it looks the same every time they return to the page.
 
 We'll start by adding a new `tableSettings` object to our `user` property:
 ```js
@@ -821,9 +842,9 @@ And we're done! `useAutosave` will listen for changes to the three specified val
 
 **IMPORTANT:** The names of the keys in your whitelist *must* correspond to the store items you want to write them to. If the naming conventions in your component's local state do not correspond to the target names in your store, you'll likely want to do something like this:
 ```js
-const localStateSort = // => locally defined state variable
+const localSortState = // => locally defined state variable
 
-useAutosave('user.tableSettings', { sortOrder: localStateSort, sortDirection, page });
+useAutosave('user.tableSettings', { sortOrder: localSortState, sortDirection, page });
 ```
 
 <br />
@@ -836,7 +857,7 @@ Suppose you have a rather complex object that you would like to track in your st
 const { sensitiveThing1, sensitiveThing2, ...rest } = complexObject;
 useAutosave('blacklistExample', rest);
 ```
-Okay this isn't terrible, but supposing you have a scenario need to use multiple object destructuring statements, you can see how it does not scale super well. Here's what it looks like using blacklist:
+Okay this isn't terrible, but supposing you have a scenario need to use multiple object destructuring statements, you can see how the pattern clutters your code as it scales. Here's what it looks like using blacklist:
 ```js
 useAutosave('blacklistExample', {...complexObject1, ...complexObject2 }, ['sensitiveThing1', 'sensitiveThing2', 'sensitiveThing3'])
 ```
@@ -852,7 +873,7 @@ useAutosave('blacklistExample', {...complexObject1, ...complexObject2 }, ['sensi
 <br />
 
 To Do List:
-- TLDR section
+- add `usage` and `args` sections to api docs
 - spread into an array
 - intermediate cases
   - avoiding data-loss

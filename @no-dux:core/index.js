@@ -10,8 +10,17 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 exports.__esModule = true;
-exports.nodux = exports.StoreController = void 0;
+exports.nodux = exports.StoreController = exports._omit = void 0;
 var _omit = function (object, blacklist) {
     var target;
     if (typeof blacklist === "string") {
@@ -32,6 +41,7 @@ var _omit = function (object, blacklist) {
     }
     return target;
 };
+exports._omit = _omit;
 var _get = function (object, path, defaultValue) {
     var pathArray = typeof path === 'string' ? path.split('.') : path;
     var target = object;
@@ -59,9 +69,14 @@ var StoreController = /** @class */ (function () {
             }
             ;
         };
-        // add normalized actions to the action registry
+        // add actions to the action registry
         this.registerActions = function (newActions) {
             _this.actions = __assign(__assign({}, _this.actions), newActions);
+        };
+        // add partitioned actions to the action registry
+        this.registerPartitionedActions = function (subdomain, newActions) {
+            var _a;
+            _this.actions = __assign(__assign({}, _this.actions), (_a = {}, _a[subdomain] = newActions, _a));
         };
         // fetch whole store
         this.getStore = function () { return JSON.parse(localStorage.getItem(_this.root) || ''); };
@@ -78,25 +93,28 @@ var StoreController = /** @class */ (function () {
         // silentUpdate sets an item without dispatching an event
         this.silentUpdate = function (path, item) {
             var store = _this.getStore();
-            var _a = _this._parsePath(path), pathArray = _a.pathArray, pathString = _a.pathString;
+            var pathArray = _this._parsePath(path).pathArray;
             var nextStore = _this._updateNestedItem(store, pathArray, item);
             localStorage.setItem(_this.root, JSON.stringify(nextStore));
         };
         // recursively overwrite the value of a nested store item
         this._updateNestedItem = function (parent, pathArray, item) {
-            var _a, _b, _c;
+            var _a, _b, _c, _d;
             var key = pathArray[0];
             var currentLayer = _get(parent, "" + key, {});
             if (pathArray.length === 1) {
+                if (Array.isArray(item) && Array.isArray(currentLayer)) {
+                    return __assign(__assign({}, parent), (_a = {}, _a[key] = __spreadArray(__spreadArray([], currentLayer, true), item, true), _a));
+                }
                 if (typeof item === "object" && !Array.isArray(item)) {
-                    return __assign(__assign({}, parent), (_a = {}, _a[key] = __assign(__assign({}, currentLayer), item), _a));
+                    return __assign(__assign({}, parent), (_b = {}, _b[key] = __assign(__assign({}, currentLayer), item), _b));
                 }
                 ;
-                return __assign(__assign({}, parent), (_b = {}, _b[key] = item, _b));
+                return __assign(__assign({}, parent), (_c = {}, _c[key] = item, _c));
             }
             ;
             var child = _this._updateNestedItem(currentLayer, pathArray.slice(1), item);
-            return __assign(__assign({}, parent), (_c = {}, _c[key] = __assign({}, child), _c));
+            return __assign(__assign({}, parent), (_d = {}, _d[key] = __assign({}, child), _d));
         };
         // remove an entire domain, or a particular property from a domain
         this.removeItem = function (path, blacklist) {
@@ -115,11 +133,11 @@ var StoreController = /** @class */ (function () {
                 throw new Error("KeyError: Invalid keyName \"" + key + "\" in object path");
             if (pathArray.length === 1) {
                 if (blacklist) {
-                    var rest = _omit(currentLayer, blacklist);
+                    var rest = (0, exports._omit)(currentLayer, blacklist);
                     return __assign(__assign({}, parent), (_a = {}, _a[key] = rest, _a));
                 }
                 else {
-                    var rest = _omit(parent, key);
+                    var rest = (0, exports._omit)(parent, key);
                     return rest;
                 }
                 ;

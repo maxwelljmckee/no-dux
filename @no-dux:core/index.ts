@@ -1,4 +1,4 @@
-const _omit = (object: object, blacklist: string | string[]): any => {
+export const _omit = (object: object, blacklist: string | string[]): any => {
   let target: any;
   if (typeof blacklist === "string") {
     target = Object.keys(object).reduce((acc, key) => {
@@ -57,9 +57,14 @@ export class StoreController {
     };
   };
 
-  // add normalized actions to the action registry
+  // add actions to the action registry
   registerActions = (newActions: object): void => {
     this.actions = { ...this.actions, ...newActions };
+  };
+
+  // add partitioned actions to the action registry
+  registerPartitionedActions = (subdomain: string, newActions: object): void => {
+    this.actions = { ...this.actions, [subdomain]: newActions};
   };
 
   // fetch whole store
@@ -80,7 +85,7 @@ export class StoreController {
   // silentUpdate sets an item without dispatching an event
   silentUpdate = (path: string | string[], item: any): void => {
     const store = this.getStore();
-    const { pathArray, pathString } = this._parsePath(path);
+    const { pathArray } = this._parsePath(path);
     const nextStore = this._updateNestedItem(store, pathArray, item);
     localStorage.setItem(this.root, JSON.stringify(nextStore));
   }
@@ -90,6 +95,9 @@ export class StoreController {
     const key = pathArray[0];
     const currentLayer = _get(parent, `${key}`, {});
     if (pathArray.length === 1) {
+      if (Array.isArray(item) && Array.isArray(currentLayer)) {
+        return { ...parent, [key]: [...currentLayer, ...item]}
+      }
       if (typeof item === "object" && !Array.isArray(item)) {
         return { ...parent, [key]: { ...currentLayer, ...item } };
       };
