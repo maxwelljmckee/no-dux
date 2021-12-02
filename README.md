@@ -16,6 +16,7 @@ A ridiculously lightweight and easy-to-use state management alternative to Redux
     - [getSize](#getsize)
   - [Nodux Actions](#nodux-actions)
     - [registerActions](#registeractions)
+    - [registerPartitionedActions](#registerpartitionedactions)
     - [Calling Your Actions](#calling-your-actions)
     - [Scalability](#scalability)
 - [React Hooks API](#react-hooks-api)
@@ -525,7 +526,7 @@ Using actions, you'll have reuseable state-update methods that you can call from
 <br />
 
 ## registerActions
-### `nodux.registerActions`
+### `nodux.registerActions(actions: object)`
 <br />
 
 First you'll want to create a new module where your actions will live. I prefer this convention for structuring my project's file-tree:
@@ -544,15 +545,12 @@ Now that you've set up your file-tree and created a new module for your actions,
 
 import { nodux } from '@no-dux/core';
 
-const logout = () => nodux.removeItem('auth');
-
 const setUserData = (userData) => nodux.setItem('user', userData);
 
 const setUserPet = (petData) => nodux.setItem('user.pet', petData);
 
 export const createUserActions = () => {
   nodux.registerActions({
-    logout,
     setUserData,
     setUserPet,
   });
@@ -584,9 +582,36 @@ Simple as that! Now our actions will be available through nodux from anywhere in
 
 <br />
 
+## registerPartitionedActions
+### `nodux.registerPartitionedActions(subdomain: string, actions: object)`
+<br />
+
+If you're concerned about the scalability of keeping all of your actions in one large registry, you can add a layer of encapsulation by partitioning your actions into subdomains. Usage is exactly the same as the `registerActions` method, except that it takes in a subdomain string as its first argument. The actions provided will now be encapsulated within that subdomain, bringing an extra layer of organization to your action registry.
+```js
+// userActions.js
+
+import { nodux } from '@no-dux/core';
+
+const setUserData = (userData) => nodux.setItem('user', userData);
+
+const setUserPet = (petData) => nodux.setItem('user.pet', petData);
+
+export const createUserActions = () => {
+  nodux.registerPartitionedActions('userActions', {
+    setUserData,
+    setUserPet,
+  });
+}
+```
+
+<br />
+
+[back to top](#no-dux)
+
+<br />
 
 ## Calling Your Actions
-Now that you have registered your actions with no-dux and called them at the top of your application, what should you do when you want to use them in a module? Easy, you have access to them through nodux:
+Now that you have registered your actions with no-dux and created them at the top of your application, what should you do when you want to use them in a module? Easy, you have access to them through nodux:
 ```js
 // another module anywhere in your application
 
@@ -596,8 +621,13 @@ const MyModule = () => {
 
   const userData = fetchUser();
 
+  // for un-partitioned actions
   const { actions } = nodux;
   actions.setUserData(userData);
+
+  // for partitioned actions
+  const { userActions } = nodux.actions;
+  userActions.setUserData(userData)
 
 
   // the syntax below is also perfectly fine
