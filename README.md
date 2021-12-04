@@ -25,9 +25,9 @@ A ridiculously lightweight and easy-to-use state management alternative to Redux
 
 # Why `no-dux`?
 ## You're looking for a new state management solution
-Many of you have probably used Redux in the past, and for most developers the initial reaction was mainly positive. What a great tool, you thought, but as time went on you started asking questions like, but why does it have so much boilerplate? And why does my data disappear on a page reload? Sure I can chuck it in localStorage to persist, but then I'm clogging up memory with unnecessary duplication. And what the heck is a reducer anyway?
+If you're a frontend or fullstack developer, chances are you've had some experience working with Redux. If you're anything like me, your initial impression was mostly positive. "What a great tool," you thought, but as time went on you started asking questions like, "but why does it have so much boilerplate? And why does my data disappear on a page reload? Sure I can chuck it in localStorage to persist, but then I'm clogging up memory with unnecessary duplication. And what the heck is a reducer anyway?"
 
-In recent years, many developers have abandoned Redux in favor of the React Context API, which captures nearly all the same use cases with less configuration. But both of these tools can face performance issues when unintended rerenders go cascading through your Virtual-DOM. And these performance pitfalls can be harder and harder to maintain as both your application and your organization scale in size and complexity.
+In recent years, many developers have abandoned Redux in favor of the React Context API, which captures nearly all the same use cases with less configuration. But if you're not careful, both of these technologies can lead you into a trap – unnecessary rerenders. At a glance this may seem inconsequential. Maybe you're a pro and you think it's somebody else's problem. But as your application and your team scale in size and complexity, controlling your rerender can become harder and harder to maintain, and may ultimately result in non-trivial performance issues.
 
 <br />
 
@@ -894,17 +894,15 @@ useAutosave('blacklistExample', {...complexObject1, ...complexObject2 }, ['sensi
 
 [back to top](#no-dux)
 
-<br />
 
 
-<br />
-<br />
-<br />
-<br />
+<!--
 
 To Do List:
+- sandbox
 - add `usage` and `args` sections to api docs
-- spread into an array
 - intermediate cases
   - avoiding data-loss
   - Variable interpolation into a path
+
+-->
