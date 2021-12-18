@@ -10,47 +10,51 @@ export const _omit = (object: object, blacklist: string | string[]): any => {
       if (!blacklist.includes(key)) return { ...acc, [key]: object[key] };
       return acc;
     }, {});
-  }
+  };
   return target;
 };
 
 const _get = (object: object, path: string | string[], defaultValue?: any): any => {
-  const pathArray = typeof path === 'string' ? path.split('.') : path
+  const pathArray = typeof path === 'string' ? path.split('.') : path;
   let target: any = object;
   while (pathArray.length) {
-    const nextKey = pathArray.shift()
-    if (!target.hasOwnProperty(nextKey)) return defaultValue
-    target = target[nextKey];
-  }
-  return target
-}
+    const nextKey: string | undefined = pathArray.shift();
+    if (!target.hasOwnProperty(nextKey)) return defaultValue;
+    target = nextKey ? target[nextKey] : defaultValue;
+  };
+  return target;
+};
 
 interface CreateStoreParams {
   root?: string,
   defaults?: object,
   config?: object,
-}
+};
+
+interface StoreConfig {
+  enableLogs?: Boolean,
+};
 
 interface UnknownObject {
   [key: string]: any;
-}
+};
 
 
 export class StoreController {
   root: string;
-  config: UnknownObject;
+  config: StoreConfig;
   actions: UnknownObject;
 
   constructor() {
     this.root = "root";
     this.config = {};
     this.actions = {};
-  }
+  };
 
   // initialize store root on app load
-  createStore = ({root = 'root', defaults = {}, config = {}}: CreateStoreParams = {}): void => {
-    if (root !== 'root') this.root = root;
-    if (config) this.config = config;
+  createStore = ({ root = 'root', defaults = {}, config = {} }: CreateStoreParams = {}): void => {
+    this.root = root;
+    this.config = config;
     const initial: string | null = localStorage.getItem(this.root);
     if (!initial) {
       localStorage.setItem(this.root, JSON.stringify(defaults));
@@ -77,7 +81,7 @@ export class StoreController {
   setItem = (path: string | string[], item: any): void => {
     const store = this.getStore();
     const { pathArray, pathString } = this._parsePath(path)
-    const nextStore = this._updateNestedItem(store, pathArray, item);
+    const nextStore = this._updateNestedItem(path, store, pathArray, item);
     localStorage.setItem(this.root, JSON.stringify(nextStore));
     document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathString }));
   };
@@ -86,24 +90,25 @@ export class StoreController {
   silentUpdate = (path: string | string[], item: any): void => {
     const store = this.getStore();
     const { pathArray } = this._parsePath(path);
-    const nextStore = this._updateNestedItem(store, pathArray, item);
+    const nextStore = this._updateNestedItem(path, store, pathArray, item);
     localStorage.setItem(this.root, JSON.stringify(nextStore));
   }
 
   // recursively overwrite the value of a nested store item
-  private _updateNestedItem = (parent: object, pathArray: string[], item: any): object => {
+  private _updateNestedItem = (path: string | string[], parent: object, pathArray: string[], item: any): object => {
     const key = pathArray[0];
     const currentLayer = _get(parent, `${key}`, {});
     if (pathArray.length === 1) {
+      if (this.config.enableLogs) console.log(`NODUX LOGS: Item ${JSON.stringify(item)} set successfully at target location "${this._getPathString(path)}"`);
       if (Array.isArray(item) && Array.isArray(currentLayer)) {
         return { ...parent, [key]: [...currentLayer, ...item]}
-      }
-      if (typeof item === "object" && !Array.isArray(item)) {
+      } else if (typeof item === "object" && !Array.isArray(item)) {
         return { ...parent, [key]: { ...currentLayer, ...item } };
       };
       return { ...parent, [key]: item };
     };
     const child = this._updateNestedItem(
+      path,
       currentLayer,
       pathArray.slice(1),
       item
@@ -115,26 +120,32 @@ export class StoreController {
   removeItem = (path: string | string[], blacklist?: string | string[]): void => {
     const store = this.getStore();
     const { pathArray, pathString } = this._parsePath(path);
-    const nextStore = this._removeNestedItem(store, pathArray, blacklist);
+    const nextStore = this._removeNestedItem(pathArray, store, pathArray, blacklist);
     localStorage.setItem(this.root, JSON.stringify(nextStore));
     document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathString }));
   };
 
   // recursively remove a nested store item
-  private _removeNestedItem = (parent: object, pathArray: string[], blacklist?: string | string[]): object => {
+  private _removeNestedItem = (path: string[], parent: object, pathArray: string[], blacklist?: string | string[]): object => {
     const key = pathArray[0];
     const currentLayer = _get(parent, `${key}`);
-    if (!currentLayer) throw new Error(`KeyError: Invalid keyName "${key}" in object path`);
+    if (!currentLayer) {
+      if (this.config.enableLogs) console.log(`NODUX LOGS: KeyError - Invalid keyname "${key}" not found at target location "${this._getPathString(path)}"`);
+      return parent;
+    }
     if (pathArray.length === 1) {
       if (blacklist) {
+        if (this.config.enableLogs) console.log(`NODUX LOGS: Item(s) ${JSON.stringify(blacklist)} removed successfully from target location "${this._getPathString(path)}"`);
         const rest = _omit(currentLayer, blacklist);
         return { ...parent, [key]: rest };
       } else {
+        if (this.config.enableLogs) console.log(`NODUX LOGS: Item "${pathArray[pathArray.length - 1]}" removed successfully from target location "${this._getPathString(path)}"`);
         const rest = _omit(parent, key);
         return rest;
       };
     };
     const child = this._removeNestedItem(
+      path,
       currentLayer,
       pathArray.slice(1),
       blacklist
@@ -144,6 +155,7 @@ export class StoreController {
 
   // clear all data from store leaving an empty object at root path
   clear = (): void => {
+    if (this.config.enableLogs) console.log('NODUX LOGS: store cleared');
     localStorage.setItem(this.root, JSON.stringify({}));
     document.dispatchEvent(new CustomEvent('watch:store-update', { detail: 'clear' }));
   };
@@ -168,6 +180,11 @@ export class StoreController {
     const pathString = (typeof path === 'string') ? path : path.join('.');
     return { pathArray, pathString };
   };
+
+  private _getPathString = (path: string | string[]): string => {
+    const pathArray = Array.isArray(path) ? path : path.split('.');
+    return pathArray.reduce((acc, key) => (acc += ` => ${key}`), this.root)
+  }
 }
 
 
