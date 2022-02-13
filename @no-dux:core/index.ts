@@ -1,32 +1,5 @@
 import * as Crypto from 'crypto-js'
 
-export const _omit = (object: UnknownObject, blacklist: string | string[]): any => {
-  let target: any;
-  if (typeof blacklist === "string") {
-    target = Object.keys(object).reduce((acc, key) => {
-      if (key !== blacklist) return { ...acc, [key]: object[key] };
-      return acc;
-    }, {});
-  } else if (Array.isArray(blacklist)) {
-    target = Object.keys(object).reduce((acc, key) => {
-      if (!blacklist.includes(key)) return { ...acc, [key]: object[key] };
-      return acc;
-    }, {});
-  };
-  return target;
-};
-
-const _get = (object: object, path: string | string[], defaultValue?: any): any => {
-  const pathArray = typeof path === 'string' ? path.split('.') : path;
-  let target: any = object;
-  while (pathArray.length) {
-    const nextKey: string | undefined = pathArray.shift();
-    if (!target.hasOwnProperty(nextKey)) return defaultValue;
-    // tslint:disable-next-line
-    target = nextKey ? target[nextKey] : defaultValue;
-  };
-  return target;
-};
 
 interface CreateStoreParams {
   root?: string,
@@ -36,12 +9,18 @@ interface CreateStoreParams {
 
 interface StoreConfig {
   enableLogs?: Boolean,
-  encrypted: Boolean,
   encryptionKey: string,
+  encryptionFn?(data: string): string,
+  decryptionFn?(cipher: string): string,
 };
 
 interface UnknownObject {
   [key: string]: any;
+};
+
+
+const storeConfigDefaults: StoreConfig = {
+  encryptionKey: '',
 };
 
 
@@ -50,9 +29,10 @@ export class StoreController {
   config: StoreConfig;
   actions: UnknownObject;
 
+
   constructor() {
     this.root = "root";
-    this.config = { encrypted: true, encryptionKey: '' };
+    this.config = storeConfigDefaults;
     this.actions = {};
   };
 
@@ -62,8 +42,7 @@ export class StoreController {
     this.config = { ...this.config, ...config };
     const initial: string | null = localStorage.getItem(this.root);
     if (!initial) {
-      const { encrypted, encryptionKey } = this.config;
-      const initialStore: string = encrypted && encryptionKey ? this._encrypt(JSON.stringify(defaults)) : JSON.stringify(defaults)
+      const initialStore: string = this.config.encryptionKey ? this._encrypt(JSON.stringify(defaults)) : JSON.stringify(defaults)
       localStorage.setItem(this.root, initialStore);
     };
   };
@@ -80,8 +59,8 @@ export class StoreController {
 
   // fetch whole store
   getStore = (): object => {
-    const { encrypted, encryptionKey } = this.config;
-    const store = encrypted && encryptionKey ? this._decrypt(localStorage.getItem(this.root) || '') : localStorage.getItem(this.root) || ''
+    const rawStore = localStorage.getItem(this.root) || ''
+    const store = this.config.encryptionKey ? this._decrypt(rawStore) : rawStore;
     return JSON.parse(store)
   };
 
@@ -93,22 +72,20 @@ export class StoreController {
 
   // merge or set an item at a path
   setItem = (path: string | string[], item: any): void => {
-    const { encrypted, encryptionKey } = this.config;
     const store = this.getStore();
     const { pathArray, pathString } = this._parsePath(path)
     const update = this._updateNestedItem(path, store, pathArray, item);
-    const nextStore = encrypted && encryptionKey ? this._encrypt(JSON.stringify(update)) : JSON.stringify(update)
+    const nextStore = this.config.encryptionKey ? this._encrypt(JSON.stringify(update)) : JSON.stringify(update)
     localStorage.setItem(this.root, nextStore);
     document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathString }));
   };
 
   // silentUpdate sets an item without dispatching an event
   silentUpdate = (path: string | string[], item: any): void => {
-    const { encrypted, encryptionKey } = this.config
     const store = this.getStore();
     const { pathArray } = this._parsePath(path);
     const update = this._updateNestedItem(path, store, pathArray, item);
-    const nextStore = encrypted && encryptionKey ? this._encrypt(JSON.stringify(update)) : JSON.stringify(update)
+    const nextStore = this.config.encryptionKey ? this._encrypt(JSON.stringify(update)) : JSON.stringify(update)
     localStorage.setItem(this.root, JSON.stringify(nextStore));
   }
 
@@ -136,11 +113,10 @@ export class StoreController {
 
   // remove an entire domain, or a particular property from a domain
   removeItem = (path: string | string[], blacklist?: string | string[]): void => {
-    const { encrypted, encryptionKey } = this.config;
     const store = this.getStore();
     const { pathArray, pathString } = this._parsePath(path);
     const update = this._removeNestedItem(pathArray, store, pathArray, blacklist);
-    const nextStore = encrypted && encryptionKey ? this._encrypt(JSON.stringify(update)) : JSON.stringify(update);
+    const nextStore = this.config.encryptionKey ? this._encrypt(JSON.stringify(update)) : JSON.stringify(update);
     localStorage.setItem(this.root, nextStore);
     document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathString }));
   };
@@ -175,9 +151,8 @@ export class StoreController {
 
   // clear all data from store leaving an empty object at root path
   clear = (): void => {
-    const { encrypted, encryptionKey } = this.config;
     if (this.config.enableLogs) console.log('NODUX LOGS: store cleared');
-    const nextStore = encrypted && encryptionKey ? this._encrypt(JSON.stringify({})) : JSON.stringify({})
+    const nextStore = this.config.encryptionKey ? this._encrypt(JSON.stringify({})) : JSON.stringify({})
     localStorage.setItem(this.root, nextStore)
     document.dispatchEvent(new CustomEvent('watch:store-update', { detail: 'clear' }));
   };
@@ -208,9 +183,19 @@ export class StoreController {
     return pathArray.reduce((acc, key) => (acc += ` => ${key}`), this.root)
   }
 
-  private _encrypt = (data: string): string => Crypto.AES.encrypt(JSON.stringify(data), this.config.encryptionKey).toString();
+  private _encrypt = (data: string): string => {
+    const { encryptionFn } = this.config;
+    if (typeof encryptionFn === 'function') {
+      return (encryptionFn(data))
+    }
+    return Crypto.AES.encrypt(JSON.stringify(data), this.config.encryptionKey).toString();
+  };
 
   private _decrypt = (cipher: string): string => {
+    const { decryptionFn } = this.config;
+    if (typeof decryptionFn === 'function') {
+      return decryptionFn(cipher)
+    }
     const bytes  = Crypto.AES.decrypt(cipher, this.config.encryptionKey);
     return JSON.parse(bytes.toString(Crypto.enc.Utf8));
   }
@@ -219,3 +204,33 @@ export class StoreController {
 
 
 export const nodux = new StoreController();
+
+
+// helpers
+export const _omit = (object: UnknownObject, blacklist: string | string[]): any => {
+  let target: any;
+  if (typeof blacklist === "string") {
+    target = Object.keys(object).reduce((acc, key) => {
+      if (key !== blacklist) return { ...acc, [key]: object[key] };
+      return acc;
+    }, {});
+  } else if (Array.isArray(blacklist)) {
+    target = Object.keys(object).reduce((acc, key) => {
+      if (!blacklist.includes(key)) return { ...acc, [key]: object[key] };
+      return acc;
+    }, {});
+  };
+  return target;
+};
+
+const _get = (object: object, path: string | string[], defaultValue?: any): any => {
+  const pathArray = typeof path === 'string' ? path.split('.') : path;
+  let target: any = object;
+  while (pathArray.length) {
+    const nextKey: string | undefined = pathArray.shift();
+    if (!target.hasOwnProperty(nextKey)) return defaultValue;
+    // tslint:disable-next-line
+    target = nextKey ? target[nextKey] : defaultValue;
+  };
+  return target;
+};
