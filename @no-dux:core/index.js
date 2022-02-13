@@ -21,6 +21,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 exports.__esModule = true;
 exports.nodux = exports.StoreController = exports._omit = void 0;
+var Crypto = require("crypto-js");
 var _omit = function (object, blacklist) {
     var target;
     if (typeof blacklist === "string") {
@@ -50,6 +51,7 @@ var _get = function (object, path, defaultValue) {
         var nextKey = pathArray.shift();
         if (!target.hasOwnProperty(nextKey))
             return defaultValue;
+        // tslint:disable-next-line
         target = nextKey ? target[nextKey] : defaultValue;
     }
     ;
@@ -65,10 +67,12 @@ var StoreController = /** @class */ (function () {
         this.createStore = function (_a) {
             var _b = _a === void 0 ? {} : _a, _c = _b.root, root = _c === void 0 ? 'root' : _c, _d = _b.defaults, defaults = _d === void 0 ? {} : _d, _e = _b.config, config = _e === void 0 ? {} : _e;
             _this.root = root;
-            _this.config = config;
+            _this.config = __assign(__assign({}, _this.config), config);
             var initial = localStorage.getItem(_this.root);
             if (!initial) {
-                localStorage.setItem(_this.root, JSON.stringify(defaults));
+                var _f = _this.config, encrypted = _f.encrypted, encryptionKey = _f.encryptionKey;
+                var initialStore = encrypted && encryptionKey ? _this._encrypt(JSON.stringify(defaults)) : JSON.stringify(defaults);
+                localStorage.setItem(_this.root, initialStore);
             }
             ;
         };
@@ -82,32 +86,43 @@ var StoreController = /** @class */ (function () {
             _this.actions = __assign(__assign({}, _this.actions), (_a = {}, _a[subdomain] = newActions, _a));
         };
         // fetch whole store
-        this.getStore = function () { return JSON.parse(localStorage.getItem(_this.root) || ''); };
+        this.getStore = function () {
+            var _a = _this.config, encrypted = _a.encrypted, encryptionKey = _a.encryptionKey;
+            var store = encrypted && encryptionKey ? _this._decrypt(localStorage.getItem(_this.root) || '') : localStorage.getItem(_this.root) || '';
+            return JSON.parse(store);
+        };
         // fetch item from a path
-        this.getItem = function (path) { return _get(JSON.parse(localStorage.getItem(_this.root) || ''), path); };
+        this.getItem = function (path) {
+            var store = _this.getStore();
+            return _get(store, path);
+        };
         // merge or set an item at a path
         this.setItem = function (path, item) {
+            var _a = _this.config, encrypted = _a.encrypted, encryptionKey = _a.encryptionKey;
             var store = _this.getStore();
-            var _a = _this._parsePath(path), pathArray = _a.pathArray, pathString = _a.pathString;
-            var nextStore = _this._updateNestedItem(path, store, pathArray, item);
-            localStorage.setItem(_this.root, JSON.stringify(nextStore));
+            var _b = _this._parsePath(path), pathArray = _b.pathArray, pathString = _b.pathString;
+            var update = _this._updateNestedItem(path, store, pathArray, item);
+            var nextStore = encrypted && encryptionKey ? _this._encrypt(JSON.stringify(update)) : JSON.stringify(update);
+            localStorage.setItem(_this.root, nextStore);
             document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathString }));
         };
         // silentUpdate sets an item without dispatching an event
         this.silentUpdate = function (path, item) {
+            var _a = _this.config, encrypted = _a.encrypted, encryptionKey = _a.encryptionKey;
             var store = _this.getStore();
             var pathArray = _this._parsePath(path).pathArray;
-            var nextStore = _this._updateNestedItem(path, store, pathArray, item);
+            var update = _this._updateNestedItem(path, store, pathArray, item);
+            var nextStore = encrypted && encryptionKey ? _this._encrypt(JSON.stringify(update)) : JSON.stringify(update);
             localStorage.setItem(_this.root, JSON.stringify(nextStore));
         };
         // recursively overwrite the value of a nested store item
         this._updateNestedItem = function (path, parent, pathArray, item) {
             var _a, _b, _c, _d;
             var key = pathArray[0];
-            var currentLayer = _get(parent, "" + key, {});
+            var currentLayer = _get(parent, "".concat(key), {});
             if (pathArray.length === 1) {
                 if (_this.config.enableLogs)
-                    console.log("NODUX LOGS: Item " + JSON.stringify(item) + " set successfully at target location \"" + _this._getPathString(path) + "\"");
+                    console.log("NODUX LOGS: Item ".concat(JSON.stringify(item), " set successfully at target location \"").concat(_this._getPathString(path), "\""));
                 if (Array.isArray(item) && Array.isArray(currentLayer)) {
                     return __assign(__assign({}, parent), (_a = {}, _a[key] = __spreadArray(__spreadArray([], currentLayer, true), item, true), _a));
                 }
@@ -123,32 +138,34 @@ var StoreController = /** @class */ (function () {
         };
         // remove an entire domain, or a particular property from a domain
         this.removeItem = function (path, blacklist) {
+            var _a = _this.config, encrypted = _a.encrypted, encryptionKey = _a.encryptionKey;
             var store = _this.getStore();
-            var _a = _this._parsePath(path), pathArray = _a.pathArray, pathString = _a.pathString;
-            var nextStore = _this._removeNestedItem(pathArray, store, pathArray, blacklist);
-            localStorage.setItem(_this.root, JSON.stringify(nextStore));
+            var _b = _this._parsePath(path), pathArray = _b.pathArray, pathString = _b.pathString;
+            var update = _this._removeNestedItem(pathArray, store, pathArray, blacklist);
+            var nextStore = encrypted && encryptionKey ? _this._encrypt(JSON.stringify(update)) : JSON.stringify(update);
+            localStorage.setItem(_this.root, nextStore);
             document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathString }));
         };
         // recursively remove a nested store item
         this._removeNestedItem = function (path, parent, pathArray, blacklist) {
             var _a, _b;
             var key = pathArray[0];
-            var currentLayer = _get(parent, "" + key);
+            var currentLayer = _get(parent, "".concat(key));
             if (!currentLayer) {
                 if (_this.config.enableLogs)
-                    console.log("NODUX LOGS: KeyError - Invalid keyname \"" + key + "\" not found at target location \"" + _this._getPathString(path) + "\"");
+                    console.log("NODUX LOGS: KeyError - Invalid keyname \"".concat(key, "\" not found at target location \"").concat(_this._getPathString(path), "\""));
                 return parent;
             }
             if (pathArray.length === 1) {
                 if (blacklist) {
                     if (_this.config.enableLogs)
-                        console.log("NODUX LOGS: Item(s) " + JSON.stringify(blacklist) + " removed successfully from target location \"" + _this._getPathString(path) + "\"");
+                        console.log("NODUX LOGS: Item(s) ".concat(JSON.stringify(blacklist), " removed successfully from target location \"").concat(_this._getPathString(path), "\""));
                     var rest = (0, exports._omit)(currentLayer, blacklist);
                     return __assign(__assign({}, parent), (_a = {}, _a[key] = rest, _a));
                 }
                 else {
                     if (_this.config.enableLogs)
-                        console.log("NODUX LOGS: Item \"" + pathArray[pathArray.length - 1] + "\" removed successfully from target location \"" + _this._getPathString(path) + "\"");
+                        console.log("NODUX LOGS: Item \"".concat(pathArray[pathArray.length - 1], "\" removed successfully from target location \"").concat(_this._getPathString(path), "\""));
                     var rest = (0, exports._omit)(parent, key);
                     return rest;
                 }
@@ -160,15 +177,17 @@ var StoreController = /** @class */ (function () {
         };
         // clear all data from store leaving an empty object at root path
         this.clear = function () {
+            var _a = _this.config, encrypted = _a.encrypted, encryptionKey = _a.encryptionKey;
             if (_this.config.enableLogs)
                 console.log('NODUX LOGS: store cleared');
-            localStorage.setItem(_this.root, JSON.stringify({}));
+            var nextStore = encrypted && encryptionKey ? _this._encrypt(JSON.stringify({})) : JSON.stringify({});
+            localStorage.setItem(_this.root, nextStore);
             document.dispatchEvent(new CustomEvent('watch:store-update', { detail: 'clear' }));
         };
         this.getSize = function () {
             var store = localStorage.getItem(_this.root) || '{}';
             var spaceUsed = ((store.length * 16) / (8 * 1024));
-            alert("\n        Store length:\n          " + (store.length > 2 ? store.length : 0) + " characters\n\n        Approximate space used:\n          " + (store.length > 2 ? spaceUsed.toFixed(2) + " KB" : "Empty (0 KB)") + "\n\n        Approximate space remaining:\n          " + (store.length > 2 ? (5120 - spaceUsed).toFixed(2) + " KB" : "5 MB") + "\n      ");
+            alert("\n        Store length:\n          ".concat(store.length > 2 ? store.length : 0, " characters\n\n        Approximate space used:\n          ").concat(store.length > 2 ? spaceUsed.toFixed(2) + " KB" : "Empty (0 KB)", "\n\n        Approximate space remaining:\n          ").concat(store.length > 2 ? (5120 - spaceUsed).toFixed(2) + " KB" : "5 MB", "\n      "));
         };
         this._parsePath = function (path) {
             var pathArray = (typeof path === 'string') ? path.split('.') : path;
@@ -177,10 +196,15 @@ var StoreController = /** @class */ (function () {
         };
         this._getPathString = function (path) {
             var pathArray = Array.isArray(path) ? path : path.split('.');
-            return pathArray.reduce(function (acc, key) { return (acc += " => " + key); }, _this.root);
+            return pathArray.reduce(function (acc, key) { return (acc += " => ".concat(key)); }, _this.root);
+        };
+        this._encrypt = function (data) { return Crypto.AES.encrypt(JSON.stringify(data), _this.config.encryptionKey).toString(); };
+        this._decrypt = function (cipher) {
+            var bytes = Crypto.AES.decrypt(cipher, _this.config.encryptionKey);
+            return JSON.parse(bytes.toString(Crypto.enc.Utf8));
         };
         this.root = "root";
-        this.config = {};
+        this.config = { encrypted: true, encryptionKey: '' };
         this.actions = {};
     }
     ;

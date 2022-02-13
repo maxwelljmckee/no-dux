@@ -1,4 +1,6 @@
-export const _omit = (object: object, blacklist: string | string[]): any => {
+import * as Crypto from 'crypto-js'
+
+export const _omit = (object: UnknownObject, blacklist: string | string[]): any => {
   let target: any;
   if (typeof blacklist === "string") {
     target = Object.keys(object).reduce((acc, key) => {
@@ -20,6 +22,7 @@ const _get = (object: object, path: string | string[], defaultValue?: any): any 
   while (pathArray.length) {
     const nextKey: string | undefined = pathArray.shift();
     if (!target.hasOwnProperty(nextKey)) return defaultValue;
+    // tslint:disable-next-line
     target = nextKey ? target[nextKey] : defaultValue;
   };
   return target;
@@ -33,6 +36,8 @@ interface CreateStoreParams {
 
 interface StoreConfig {
   enableLogs?: Boolean,
+  encrypted: Boolean,
+  encryptionKey: string,
 };
 
 interface UnknownObject {
@@ -47,17 +52,19 @@ export class StoreController {
 
   constructor() {
     this.root = "root";
-    this.config = {};
+    this.config = { encrypted: true, encryptionKey: '' };
     this.actions = {};
   };
 
   // initialize store root on app load
   createStore = ({ root = 'root', defaults = {}, config = {} }: CreateStoreParams = {}): void => {
     this.root = root;
-    this.config = config;
+    this.config = { ...this.config, ...config };
     const initial: string | null = localStorage.getItem(this.root);
     if (!initial) {
-      localStorage.setItem(this.root, JSON.stringify(defaults));
+      const { encrypted, encryptionKey } = this.config;
+      const initialStore: string = encrypted && encryptionKey ? this._encrypt(JSON.stringify(defaults)) : JSON.stringify(defaults)
+      localStorage.setItem(this.root, initialStore);
     };
   };
 
@@ -72,25 +79,36 @@ export class StoreController {
   };
 
   // fetch whole store
-  getStore = (): object => JSON.parse(localStorage.getItem(this.root) || '');
+  getStore = (): object => {
+    const { encrypted, encryptionKey } = this.config;
+    const store = encrypted && encryptionKey ? this._decrypt(localStorage.getItem(this.root) || '') : localStorage.getItem(this.root) || ''
+    return JSON.parse(store)
+  };
 
   // fetch item from a path
-  getItem = (path: string | string[]): any => _get(JSON.parse(localStorage.getItem(this.root) || ''), path);
+  getItem = (path: string | string[]): any => {
+    const store = this.getStore()
+    return _get(store, path)
+  };
 
   // merge or set an item at a path
   setItem = (path: string | string[], item: any): void => {
+    const { encrypted, encryptionKey } = this.config;
     const store = this.getStore();
     const { pathArray, pathString } = this._parsePath(path)
-    const nextStore = this._updateNestedItem(path, store, pathArray, item);
-    localStorage.setItem(this.root, JSON.stringify(nextStore));
+    const update = this._updateNestedItem(path, store, pathArray, item);
+    const nextStore = encrypted && encryptionKey ? this._encrypt(JSON.stringify(update)) : JSON.stringify(update)
+    localStorage.setItem(this.root, nextStore);
     document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathString }));
   };
 
   // silentUpdate sets an item without dispatching an event
   silentUpdate = (path: string | string[], item: any): void => {
+    const { encrypted, encryptionKey } = this.config
     const store = this.getStore();
     const { pathArray } = this._parsePath(path);
-    const nextStore = this._updateNestedItem(path, store, pathArray, item);
+    const update = this._updateNestedItem(path, store, pathArray, item);
+    const nextStore = encrypted && encryptionKey ? this._encrypt(JSON.stringify(update)) : JSON.stringify(update)
     localStorage.setItem(this.root, JSON.stringify(nextStore));
   }
 
@@ -118,10 +136,12 @@ export class StoreController {
 
   // remove an entire domain, or a particular property from a domain
   removeItem = (path: string | string[], blacklist?: string | string[]): void => {
+    const { encrypted, encryptionKey } = this.config;
     const store = this.getStore();
     const { pathArray, pathString } = this._parsePath(path);
-    const nextStore = this._removeNestedItem(pathArray, store, pathArray, blacklist);
-    localStorage.setItem(this.root, JSON.stringify(nextStore));
+    const update = this._removeNestedItem(pathArray, store, pathArray, blacklist);
+    const nextStore = encrypted && encryptionKey ? this._encrypt(JSON.stringify(update)) : JSON.stringify(update);
+    localStorage.setItem(this.root, nextStore);
     document.dispatchEvent(new CustomEvent('watch:store-update', { detail: pathString }));
   };
 
@@ -155,8 +175,10 @@ export class StoreController {
 
   // clear all data from store leaving an empty object at root path
   clear = (): void => {
+    const { encrypted, encryptionKey } = this.config;
     if (this.config.enableLogs) console.log('NODUX LOGS: store cleared');
-    localStorage.setItem(this.root, JSON.stringify({}));
+    const nextStore = encrypted && encryptionKey ? this._encrypt(JSON.stringify({})) : JSON.stringify({})
+    localStorage.setItem(this.root, nextStore)
     document.dispatchEvent(new CustomEvent('watch:store-update', { detail: 'clear' }));
   };
 
@@ -185,6 +207,14 @@ export class StoreController {
     const pathArray = Array.isArray(path) ? path : path.split('.');
     return pathArray.reduce((acc, key) => (acc += ` => ${key}`), this.root)
   }
+
+  private _encrypt = (data: string): string => Crypto.AES.encrypt(JSON.stringify(data), this.config.encryptionKey).toString();
+
+  private _decrypt = (cipher: string): string => {
+    const bytes  = Crypto.AES.decrypt(cipher, this.config.encryptionKey);
+    return JSON.parse(bytes.toString(Crypto.enc.Utf8));
+  }
+
 }
 
 
