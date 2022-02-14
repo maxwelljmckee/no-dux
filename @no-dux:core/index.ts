@@ -61,7 +61,7 @@ export class StoreController {
   getStore = (): object => {
     const rawStore = localStorage.getItem(this.root) || ''
     const store = this.config.encryptionKey ? this._decrypt(rawStore) : rawStore;
-    return JSON.parse(store)
+    return JSON.parse(store);
   };
 
   // fetch item from a path
