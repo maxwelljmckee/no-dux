@@ -10,8 +10,8 @@ interface CreateStoreParams {
 interface StoreConfig {
   enableLogs?: Boolean,
   encryptionKey: string,
-  encryptionFn?(data: string): string,
-  decryptionFn?(cipher: string): string,
+  encryptionFn?(data: string, key: string): string,
+  decryptionFn?(cipher: string, key: string): string,
 };
 
 interface UnknownObject {
@@ -186,7 +186,7 @@ export class StoreController {
   private _encrypt = (data: string): string => {
     const { encryptionFn } = this.config;
     if (typeof encryptionFn === 'function') {
-      return (encryptionFn(data))
+      return encryptionFn(data, this.config.encryptionKey)
     }
     return Crypto.AES.encrypt(JSON.stringify(data), this.config.encryptionKey).toString();
   };
@@ -194,7 +194,7 @@ export class StoreController {
   private _decrypt = (cipher: string): string => {
     const { decryptionFn } = this.config;
     if (typeof decryptionFn === 'function') {
-      return decryptionFn(cipher)
+      return decryptionFn(cipher, this.config.encryptionKey)
     }
     const bytes  = Crypto.AES.decrypt(cipher, this.config.encryptionKey);
     return JSON.parse(bytes.toString(Crypto.enc.Utf8));

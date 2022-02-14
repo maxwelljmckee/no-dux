@@ -55,9 +55,7 @@ var StoreController = /** @class */ (function () {
         // fetch whole store
         this.getStore = function () {
             var rawStore = localStorage.getItem(_this.root) || '';
-            console.log('rawStore', rawStore);
-            console.log('startsWith { ?', rawStore.startsWith('{'));
-            var store = rawStore.startsWith('{') ? rawStore : _this._decrypt(rawStore);
+            var store = _this.config.encryptionKey ? _this._decrypt(rawStore) : rawStore;
             return JSON.parse(store);
         };
         // fetch item from a path
@@ -166,18 +164,14 @@ var StoreController = /** @class */ (function () {
         this._encrypt = function (data) {
             var encryptionFn = _this.config.encryptionFn;
             if (typeof encryptionFn === 'function') {
-                return (encryptionFn(data));
+                return (encryptionFn(data, _this.config.encryptionKey));
             }
             return Crypto.AES.encrypt(JSON.stringify(data), _this.config.encryptionKey).toString();
         };
         this._decrypt = function (cipher) {
-            console.log('HIT DECRYPT METHOD');
-            if (cipher.startsWith('{')) {
-                return cipher;
-            }
             var decryptionFn = _this.config.decryptionFn;
             if (typeof decryptionFn === 'function') {
-                return decryptionFn(cipher);
+                return decryptionFn(cipher, _this.config.encryptionKey);
             }
             var bytes = Crypto.AES.decrypt(cipher, _this.config.encryptionKey);
             return JSON.parse(bytes.toString(Crypto.enc.Utf8));
