@@ -1,6 +1,5 @@
 import * as Crypto from 'crypto-js'
 
-
 interface CreateStoreParams {
   root?: string,
   defaults?: object,
@@ -18,11 +17,9 @@ interface UnknownObject {
   [key: string]: any;
 };
 
-
 const storeConfigDefaults: StoreConfig = {
   encryptionKey: '',
 };
-
 
 export class StoreController {
   root: string;
