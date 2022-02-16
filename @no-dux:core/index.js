@@ -91,7 +91,7 @@ var StoreController = /** @class */ (function () {
                 if (Array.isArray(item) && Array.isArray(currentLayer)) {
                     return __assign(__assign({}, parent), (_a = {}, _a[key] = __spreadArray(__spreadArray([], currentLayer, true), item, true), _a));
                 }
-                else if (typeof item === "object" && !Array.isArray(item)) {
+                else if (typeof item === "object" && typeof currentLayer === 'object' && !Array.isArray(item) && !Array.isArray(currentLayer)) {
                     return __assign(__assign({}, parent), (_b = {}, _b[key] = __assign(__assign({}, currentLayer), item), _b));
                 }
                 ;
@@ -164,7 +164,7 @@ var StoreController = /** @class */ (function () {
         this._encrypt = function (data) {
             var encryptionFn = _this.config.encryptionFn;
             if (typeof encryptionFn === 'function') {
-                return (encryptionFn(data, _this.config.encryptionKey));
+                return encryptionFn(data, _this.config.encryptionKey);
             }
             return Crypto.AES.encrypt(JSON.stringify(data), _this.config.encryptionKey).toString();
         };

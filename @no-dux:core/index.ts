@@ -94,7 +94,7 @@ export class StoreController {
       if (this.config.enableLogs) console.log(`NODUX LOGS: Item ${JSON.stringify(item)} set successfully at target location "${this._getPathString(path)}"`);
       if (Array.isArray(item) && Array.isArray(currentLayer)) {
         return { ...parent, [key]: [...currentLayer, ...item]}
-      } else if (typeof item === "object" && !Array.isArray(item)) {
+      } else if (typeof item === "object" && typeof currentLayer === 'object' && !Array.isArray(item) && !Array.isArray(currentLayer)) {
         return { ...parent, [key]: { ...currentLayer, ...item } };
       };
       return { ...parent, [key]: item };
