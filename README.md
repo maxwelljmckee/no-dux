@@ -136,19 +136,7 @@ actions.updateUiTheme({ darkTheme: true });
 <br />
 
 # Getting Started
-If you're working on a React application, you'll likely want to download the `no-dux` extension that comes with some handy stateful-update hooks:
 
-```
-npm install @no-dux/react
-```
-or
-```
-yarn add @no-dux/react
-```
-
-<br />
-
-Otherwise you can download the core module using:
 ```
 npm install @no-dux/core
 ```
