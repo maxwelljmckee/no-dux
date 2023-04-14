@@ -153,7 +153,7 @@ yarn add @no-dux/core
 
 # Core API
 ## createStore
-### `nodux.createStore({ root?: string, defaultStore?: object })`
+### `nodux.createStore({ root?: string, defaults?: object })`
 <br />
 
 The first thing we'll need to do is instantiate our store somewhere near the top level of our application. If you're working on a React app, you'll likely prefer to use your `App` component. We'll also specify some default values so we have some data to work with in upcoming examples. That looks like this:
